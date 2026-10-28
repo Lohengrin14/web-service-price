@@ -21,6 +21,11 @@ describe('findInCatalog', () => {
     expect(numbers(findInCatalog(entries, '  стеклоподъемник   ЗАД '))).toEqual(['01089'])
   })
 
+  it('не различает твёрдый и мягкий знак', () => {
+    expect(numbers(findInCatalog(entries, 'стеклоподьемник'))).toEqual(['01089'])
+    expect(numbers(findInCatalog(entries, 'СТЕКЛОПОДЬЁМ'))).toEqual(['01089'])
+  })
+
   it('не ищет по середине слова и по пустому запросу', () => {
     expect(findInCatalog(entries, 'тр')).toEqual([])
     expect(findInCatalog(entries, '   ')).toEqual([])

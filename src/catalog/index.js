@@ -10,11 +10,13 @@ export const MAX_LEARNED = 5000
 // Запись справочника: { name, number, brand, count }
 const keyOf = (entry) => `${entry.brand}|${entry.number}`.toUpperCase()
 
-// «Ёлка  Фильтр » → «елка фильтр»
+// «Ёлка  Фильтр » → «елка фильтр». Ё и Е, Ъ и Ь не различаем: их часто путают или
+// пишут без ё — «стеклоподьемник» должен найти «Стеклоподъёмник».
 export function normalizeText(text) {
   return String(text ?? '')
     .toLowerCase()
     .replace(/ё/g, 'е')
+    .replace(/ъ/g, 'ь')
     .trim()
     .replace(/\s+/g, ' ')
 }
