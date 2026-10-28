@@ -57,14 +57,14 @@ export default function SearchForm() {
   return (
     <form className="mb-4" role="search" onSubmit={handleSubmit}>
       <label htmlFor="part-number" className="form-label fw-semibold">
-        Артикул детали
+        Артикул или название детали
       </label>
       <div className="input-group input-group-lg">
         <input
           id="part-number"
           type="search"
           className="form-control"
-          placeholder="Например, 01089"
+          placeholder="Например, 01089 или колодки"
           value={value}
           onChange={handleChange}
           autoComplete="off"
@@ -84,7 +84,10 @@ export default function SearchForm() {
           )}
         </button>
       </div>
-      <div className="form-text">Поиск запускается сам через секунду после ввода, по Enter — сразу.</div>
+      <div className="form-text">
+        Поиск запускается сам через секунду после ввода, по Enter — сразу. Поиск по артикулу — полный.
+        По названию — по справочнику, результат может быть неполным.
+      </div>
     </form>
   )
 }

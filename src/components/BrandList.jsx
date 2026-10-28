@@ -14,7 +14,7 @@ function StockBadge({ count }) {
 
 export default function BrandList() {
   const dispatch = useDispatch()
-  const { number, selected, brands } = useSelector(selectSearch)
+  const { number, fromName, selected, brands } = useSelector(selectSearch)
   const [query, setQuery] = useState('')
   const normalizedQuery = query.trim().toLowerCase()
   const matchingBrands = normalizedQuery
@@ -32,6 +32,12 @@ export default function BrandList() {
     body = (
       <div className="card-body">
         <ErrorAlert message={brands.error} onRetry={() => dispatch(fetchBrands({ number }))} />
+      </div>
+    )
+  } else if (brands.items.length === 0 && fromName) {
+    body = (
+      <div className="card-body text-body-secondary">
+        В справочнике по этому названию пусто. Поиск по артикулу — полный, попробуйте номер детали.
       </div>
     )
   } else if (brands.items.length === 0) {

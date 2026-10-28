@@ -77,7 +77,7 @@ export const searchByName = createAsyncThunk(
   async (query, { dispatch, getState, requestId }) => {
     const found = await searchCatalog(query)
     if (found.length === 0 && getState().search.names.requestId === requestId) {
-      dispatch(fetchBrands({ number: normalizeNumber(query) }))
+      dispatch(fetchBrands({ number: normalizeNumber(query), fromName: true }))
     }
     return [...found].sort((a, b) => (b.count > 0) - (a.count > 0))
   },
@@ -96,6 +96,7 @@ const initialState = {
   query: '', // название последнего поиска по справочнику
   names: emptyRequest, // найденные в справочнике детали: [{ name, number, brand, count }]
   number: '', // артикул последнего поиска
+  fromName: false, // поиск по артикулу запущен как откат после пустого поиска по названию
   selected: null, // выбранный производитель: { brand, number }
   brands: emptyRequest,
   offers: emptyRequest,
@@ -133,6 +134,7 @@ const searchSlice = createSlice({
         state.query = ''
         state.names = emptyRequest
         state.number = action.meta.arg.number
+        state.fromName = Boolean(action.meta.arg.fromName)
         state.selected = null
         state.brands = { ...emptyRequest, status: 'loading', requestId: action.meta.requestId }
         state.offers = emptyRequest

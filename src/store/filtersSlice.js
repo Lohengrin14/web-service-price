@@ -99,12 +99,12 @@ export function applyFilters(items, { minPrice, maxPrice, inStockOnly, brands, c
   return sorter ? result.sort(sorter) : result
 }
 
-// Варианты для чекбоксов: { value, stock } по полю предложения.
+// Варианты для чекбоксов: { value, stock } по полю field, остаток берём из stockField.
 // Сначала с наибольшим суммарным остатком, варианты без товара — внизу.
-function summarizeStock(items, field) {
+export function summarizeStock(items, field, stockField = 'stock') {
   const stocks = new Map()
-  for (const offer of items) {
-    stocks.set(offer[field], (stocks.get(offer[field]) ?? 0) + offer.stock)
+  for (const item of items) {
+    stocks.set(item[field], (stocks.get(item[field]) ?? 0) + item[stockField])
   }
 
   return [...stocks]

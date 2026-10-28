@@ -4,6 +4,7 @@ import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../st
 import { fetchOffers, selectSearch } from '../store/searchSlice'
 import { formatPrice, formatShipment, pluralize } from '../utils/format'
 import ErrorAlert from './ErrorAlert'
+import LoadMore from './LoadMore'
 import Loader from './Loader'
 import OfferFilters from './OfferFilters'
 
@@ -82,30 +83,6 @@ function OfferRow({ offer }) {
       </td>
       <td className="text-end text-nowrap fw-semibold">{formatPrice(offer.price)}</td>
     </tr>
-  )
-}
-
-// Метка под таблицей: когда пользователь доскроллил до неё, подгружаем следующую порцию.
-// shown в зависимостях — после подгрузки пересоздаём наблюдатель: если метка всё ещё
-// на экране (высокий экран), он сразу сработает снова.
-function LoadMore({ shown, total, onLoad }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) onLoad()
-      },
-      { rootMargin: '300px' },
-    )
-    observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [shown, onLoad])
-
-  return (
-    <div ref={ref} className="card-footer bg-body small text-body-secondary text-center">
-      Показано аналогов: {shown} из {total}. Прокрутите ниже, чтобы увидеть ещё.
-    </div>
   )
 }
 
@@ -252,7 +229,12 @@ export default function OffersTable() {
           </button>
         )}
         {rest > 0 && (
-          <LoadMore shown={analogueRows.length} total={analogues.length} onLoad={showMore} />
+          <LoadMore
+            label="Показано аналогов"
+            shown={analogueRows.length}
+            total={analogues.length}
+            onLoad={showMore}
+          />
         )}
       </>
     )
