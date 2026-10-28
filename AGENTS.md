@@ -18,7 +18,8 @@ the guiding principle is **the simpler, the better**.
 - Talk to the user in **Russian**.
 - UI texts live in dictionaries `src/i18n/ru.js` and `src/i18n/en.js` (same keys, checked by a test);
   components use `useT()`. Russian is the default language by design. Code comments are in **Russian**.
-- The English UI searches by part number only (the name catalog is Russian); its texts don't mention name search.
+- Catalog search matches words in part names and manufacturers. The English UI advertises part number and
+  manufacturer search only (manufacturers are Latin, part names are Russian).
 - API errors are stored as codes (`{ codes, params }` via `rejectWithValue`) and translated on render.
 - Never pass `shipmentDate` through `new Date()` for display: it is Moscow time "order by".
 - **Git commit messages, branch names and PR titles/descriptions are in English**, Conventional Commits
@@ -90,6 +91,16 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
 - **The parser is written from the PDF only and has not been verified against the live API.**
   When live responses become available, compare them with `src/api/favorit.js`, fix the parser,
   and add sanitized real responses (no key) as test fixtures.
+
+## Design system
+
+- Bootstrap 5.3 stays; `src/index.css` defines `--ps-*` tokens (slate neutrals, one amber accent,
+  green/red only by meaning) and maps Bootstrap CSS variables onto them. Light and dark themes via
+  `data-bs-theme`; the theme is set before render by a script in `index.html`.
+- Text contrast must stay ≥ WCAG AA in both themes: amber `#f59e0b`/`#d97706` are fills, borders
+  and focus only; text uses `--ps-accent-text`. Use tokens, not hard-coded colors.
+- Helpers: `.part-number` (monospace), `.num` (tabular digits), `StockPill`, `Skeleton`,
+  `.btn-quiet` for secondary buttons; `.btn-primary` is the only bright fill.
 
 ## Workflow
 

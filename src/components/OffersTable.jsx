@@ -6,9 +6,10 @@ import { fetchOffers, selectSearch } from '../store/searchSlice'
 import { formatPrice, formatShipment } from '../utils/format'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
-import Loader from './Loader'
+import Skeleton from './Skeleton'
 import OfferFilters from './OfferFilters'
 import SortButton from './SortButton'
+import StockPill from './StockPill'
 
 const COLUMNS = 4
 // Большие выдачи (у OC90 больше 3 тыс. предложений) показываем порциями
@@ -31,6 +32,15 @@ const STOCK_ORDERS = [
   ['stock-asc', true],
 ]
 
+// Самое дешёвое предложение в наличии; позиции без цены не участвуют
+function findBestOffer(offers) {
+  let best = null
+  for (const offer of offers) {
+    if (offer.stock > 0 && offer.price !== null && (!best || offer.price < best.price)) best = offer
+  }
+  return best
+}
+
 function SortHeader({ label, orders, className }) {
   const dispatch = useDispatch()
   const { sort } = useSelector(selectFilters)
@@ -52,18 +62,23 @@ function SortHeader({ label, orders, className }) {
   )
 }
 
-function OfferRow({ offer }) {
+function OfferRow({ offer, isBest }) {
   const { t, lang } = useT()
   const inStock = offer.stock > 0
   const shipment = formatShipment(offer.shipmentDate, lang)
   const warehouse = [offer.warehouse, shipment].filter(Boolean).join(' · ')
 
   return (
-    <tr className={inStock ? undefined : 'offer-muted'}>
+    <tr className={isBest ? 'offer-best' : inStock ? undefined : 'offer-muted'}>
       <td>
         <div>
           <span className="fw-semibold">{offer.brand}</span>
-          <span className="small text-body-secondary ms-2">{offer.number}</span>
+          <span className="part-number text-body-secondary ms-2">{offer.number}</span>
+          {isBest && (
+            <span className="best-badge" title={t('offers.bestHint')}>
+              {t('offers.best')}
+            </span>
+          )}
         </div>
         <div>{offer.name || '—'}</div>
         {/* На узком экране склад и отгрузка показываются здесь, а не отдельной колонкой */}
@@ -73,26 +88,22 @@ function OfferRow({ offer }) {
         <div>{offer.warehouse || '—'}</div>
         {shipment && <div className="text-body-secondary text-nowrap">{shipment}</div>}
       </td>
-      <td className="text-end text-nowrap">
-        {inStock ? (
-          t('common.pcs', { count: offer.stock })
-        ) : (
-          <span className="badge text-bg-light border">{t('common.outOfStock')}</span>
-        )}
+      <td className="offer-stock text-end text-nowrap">
+        <StockPill count={offer.stock} />
       </td>
-      <td className="text-end text-nowrap fw-semibold">{formatPrice(offer.price, lang)}</td>
+      <td className="num text-end text-nowrap fw-semibold">{formatPrice(offer.price, lang)}</td>
     </tr>
   )
 }
 
 // offers — вся группа (для счётчиков), rows — строки, которые видны на текущей странице
-function OfferGroup({ title, offers, rows = offers, emptyText }) {
+function OfferGroup({ title, offers, rows = offers, emptyText, bestId }) {
   const { t } = useT()
   const parts = new Set(offers.map((offer) => offer.partKey)).size
 
   return (
     <tbody>
-      <tr className="table-light">
+      <tr className="offer-group-row">
         <th colSpan={COLUMNS} className="small">
           {title}
           {offers.length > 0 && (
@@ -103,7 +114,7 @@ function OfferGroup({ title, offers, rows = offers, emptyText }) {
         </th>
       </tr>
       {offers.length > 0 ? (
-        rows.map((offer) => <OfferRow key={offer.id} offer={offer} />)
+        rows.map((offer) => <OfferRow key={offer.id} offer={offer} isBest={offer.id === bestId} />)
       ) : (
         <tr>
           <td colSpan={COLUMNS} className="text-body-secondary">
@@ -148,9 +159,7 @@ export default function OffersTable() {
     )
   } else if (offers.status === 'loading') {
     body = (
-      <div className="card-body">
-        <Loader text={t('offers.loading')} />
-      </div>
+      <Skeleton text={t('offers.loading')} rows={6} />
     )
   } else if (offers.status === 'failed') {
     body = (
@@ -185,45 +194,47 @@ export default function OffersTable() {
     const rest = analogues.length - analogueRows.length
     const hasOriginal = offers.items.some((offer) => offer.isOriginal)
     const hasAnalogues = offers.items.some((offer) => !offer.isOriginal)
+    // Лучшее предложение — самое дешёвое в наличии по всей отфильтрованной выдаче, до обрезки
+    const bestId = visible.length > 1 ? findBestOffer(visible)?.id : undefined
 
     body = (
       <>
         <OfferFilters />
-        <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead>
-              <tr>
-                <th scope="col">{t('offers.colPart')}</th>
-                <SortHeader
-                  label={t('offers.colWarehouse')}
-                  orders={SHIPMENT_ORDERS}
-                  className="d-none d-md-table-cell"
-                />
-                <SortHeader label={t('offers.colStock')} orders={STOCK_ORDERS} className="text-end" />
-                <SortHeader label={t('offers.colPrice')} orders={PRICE_ORDERS} className="text-end" />
-              </tr>
-            </thead>
-            {/* Искомую деталь фильтры тоже скрывают, но секция остаётся, чтобы это было видно */}
-            {hasOriginal && (
-              <OfferGroup
-                title={t('offers.original')}
-                offers={original}
-                emptyText={t('offers.hiddenByFilters')}
+        <table className="table table-hover align-middle mb-0 offers-table">
+          <thead>
+            <tr>
+              <th scope="col">{t('offers.colPart')}</th>
+              <SortHeader
+                label={t('offers.colWarehouse')}
+                orders={SHIPMENT_ORDERS}
+                className="d-none d-md-table-cell"
               />
-            )}
+              <SortHeader label={t('offers.colStock')} orders={STOCK_ORDERS} className="text-end" />
+              <SortHeader label={t('offers.colPrice')} orders={PRICE_ORDERS} className="text-end" />
+            </tr>
+          </thead>
+          {/* Искомую деталь фильтры тоже скрывают, но секция остаётся, чтобы это было видно */}
+          {hasOriginal && (
             <OfferGroup
-              title={t('offers.analogues')}
-              offers={analogues}
-              rows={analogueRows}
-              emptyText={t(hasAnalogues ? 'offers.noAnalogueMatch' : 'offers.noAnalogues')}
+              title={t('offers.original')}
+              offers={original}
+              emptyText={t('offers.hiddenByFilters')}
+              bestId={bestId}
             />
-          </table>
-        </div>
+          )}
+          <OfferGroup
+            title={t('offers.analogues')}
+            offers={analogues}
+            rows={analogueRows}
+            emptyText={t(hasAnalogues ? 'offers.noAnalogueMatch' : 'offers.noAnalogues')}
+            bestId={bestId}
+          />
+        </table>
         {/* Длинный список — даём быстро вернуться к фильтрам, не прокручивая всё назад */}
         {isFarBelow && analogueRows.length >= SCROLL_TOP_AFTER && (
           <button
             type="button"
-            className="btn btn-primary rounded-pill shadow position-fixed bottom-0 end-0 m-3"
+            className="btn btn-quiet rounded-pill shadow position-fixed bottom-0 end-0 m-3"
             style={{ zIndex: 1030 }}
             onClick={() => sectionRef.current.scrollIntoView({ behavior: 'smooth' })}
           >
@@ -242,12 +253,12 @@ export default function OffersTable() {
   }
 
   return (
-    <section ref={sectionRef} className="card shadow-sm offers-card">
+    <section ref={sectionRef} className="card offers-card">
       <div className="card-header bg-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <h2 className="h6 mb-0">{t('offers.title')}</h2>
+        <h2 className="section-title mb-0">{t('offers.title')}</h2>
         {selected && (
           <span className="small text-body-secondary">
-            {selected.brand} · {selected.number}
+            {selected.brand} · <span className="part-number">{selected.number}</span>
           </span>
         )}
       </div>

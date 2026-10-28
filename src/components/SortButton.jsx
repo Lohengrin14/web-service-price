@@ -18,7 +18,7 @@ export default function SortButton({ label, orders, sort, onSort }) {
       onClick={() => onSort(next)}
     >
       <span className="sort-label">{label}</span>{' '}
-      <span className={active ? 'text-primary' : 'text-body-tertiary'} aria-hidden="true">
+      <span className={`sort-icon${active ? ' is-active' : ''}`} aria-hidden="true">
         {active ? (active[1] ? '↑' : '↓') : '↕'}
       </span>
     </button>

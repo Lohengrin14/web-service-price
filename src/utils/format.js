@@ -10,6 +10,16 @@ export function formatPrice(price, lang = 'ru') {
   }).format(price)
 }
 
+// Цена без копеек — для подписей шкалы: «2 500 ₽», «₽2,500»
+export function formatPriceRound(price, lang = 'ru') {
+  return new Intl.NumberFormat(localeOf(lang), {
+    style: 'currency',
+    currency: 'RUB',
+    currencyDisplay: 'narrowSymbol',
+    maximumFractionDigits: 0,
+  }).format(price)
+}
+
 // shipmentDate — дата отгрузки и время, до которого нужно сделать заказ.
 // Понимает ISO (2026-10-28T14:00:00) и формат 1С (28.10.2026 14:00:00).
 function parseShipment(value) {

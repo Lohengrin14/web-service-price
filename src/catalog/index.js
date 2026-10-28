@@ -10,26 +10,29 @@ export const MAX_LEARNED = 5000
 // Запись справочника: { name, number, brand, count }
 const keyOf = (entry) => `${entry.brand}|${entry.number}`.toUpperCase()
 
-// «Ёлка  Фильтр » → «елка фильтр»
+// «Ёлка  Фильтр » → «елка фильтр». Ё и Е, Ъ и Ь не различаем: их часто путают или
+// пишут без ё — «стеклоподьемник» должен найти «Стеклоподъёмник».
 export function normalizeText(text) {
   return String(text ?? '')
     .toLowerCase()
     .replace(/ё/g, 'е')
+    .replace(/ъ/g, 'ь')
     .trim()
     .replace(/\s+/g, ' ')
 }
 
 const tokenize = (text) => normalizeText(text).split(/[^\p{L}\p{N}]+/u).filter(Boolean)
 
-// Каждое слово запроса — начало какого-то слова названия, порядок слов не важен:
-// «фильтр масл» находит «Масляный фильтр»
+// Каждое слово запроса — начало какого-то слова названия или производителя, порядок слов
+// не важен: «фильтр масл» находит «Масляный фильтр», «колодки brembo» — колодки BREMBO
 export function findInCatalog(entries, query) {
   const queryTokens = tokenize(query)
   if (queryTokens.length === 0) return []
 
+  // Слова ищем и в названии, и в производителе: «bosch», «колодки brembo»
   return entries.filter((entry) => {
-    const nameTokens = tokenize(entry.name)
-    return queryTokens.every((token) => nameTokens.some((word) => word.startsWith(token)))
+    const words = [...tokenize(entry.name), ...tokenize(entry.brand)]
+    return queryTokens.every((token) => words.some((word) => word.startsWith(token)))
   })
 }
 

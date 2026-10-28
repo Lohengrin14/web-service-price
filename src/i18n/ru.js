@@ -2,16 +2,16 @@
 // Значение — строка с подстановками {name} или формы для Intl.PluralRules по {count}.
 export default {
   'app.title': 'Поиск автозапчастей',
-  'app.subtitle': 'Введите артикул или название, выберите производителя — покажем цены, остатки и аналоги.',
+  'app.subtitle':
+    'Введите артикул, название или производителя — покажем цены, остатки и аналоги.',
   'app.language': 'Язык интерфейса',
+  'theme.toDark': 'Включить тёмную тему',
+  'theme.toLight': 'Включить светлую тему',
 
-  'search.label': 'Артикул или название детали',
-  'search.placeholder': 'Например, 01089 или колодки',
+  'search.label': 'Артикул, название или производитель',
+  'search.placeholder': 'Например, 01089, колодки или bosch',
   'search.submit': 'Найти',
   'search.loading': 'Идёт поиск',
-  'search.hint':
-    'Поиск запускается сам через секунду после ввода, по Enter — сразу. Поиск по артикулу — полный. ' +
-    'По названию — по справочнику, результат может быть неполным.',
 
   'common.loading': 'Загрузка…',
   'common.retry': 'Повторить',
@@ -47,6 +47,8 @@ export default {
   'offers.hiddenByFilters': 'Скрыта фильтрами.',
   'offers.noAnalogueMatch': 'Под фильтры не подошёл ни один аналог.',
   'offers.noAnalogues': 'Аналогов не найдено.',
+  'offers.best': 'Лучшая цена',
+  'offers.bestHint': 'Самое дешёвое предложение в наличии',
   'offers.parts': { one: '{count} деталь', few: '{count} детали', many: '{count} деталей', other: '{count} детали' },
   'offers.count': {
     one: '{count} предложение',
@@ -56,10 +58,10 @@ export default {
   },
   'offers.loadMore': 'Показано аналогов: {shown} из {total}. Прокрутите ниже, чтобы увидеть ещё.',
 
-  'filters.price': 'Цена, ₽',
-  'filters.priceFrom': 'от',
-  'filters.priceTo': 'до',
-  'filters.priceToLabel': 'Цена до',
+  'filters.price': 'Цена',
+  'filters.priceRange': '{from} — {to}',
+  'filters.priceMin': 'Минимальная цена',
+  'filters.priceMax': 'Максимальная цена',
   'filters.sort': 'Сортировка',
   'filters.findBrand': 'Найти производителя',
   'filters.cities': 'Города',
@@ -82,7 +84,8 @@ export default {
 
   'names.title': 'Детали из справочника',
   'names.loading': 'Ищем в справочнике…',
-  'names.empty': 'В справочнике по этому названию пусто. Поиск по артикулу — полный, попробуйте номер детали.',
+  'names.empty':
+    'В справочнике по этому запросу пусто. Поиск по артикулу — полный, попробуйте номер детали.',
   'names.incomplete':
     'Список по названию может быть неполным — он строится по справочнику. ' +
     'Полный список предложений и аналогов — в поиске по артикулу.',

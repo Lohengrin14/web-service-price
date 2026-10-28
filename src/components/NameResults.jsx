@@ -6,8 +6,9 @@ import { fetchBrands, searchByName, selectSearch } from '../store/searchSlice'
 import CheckboxFilter from './CheckboxFilter'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
-import Loader from './Loader'
+import Skeleton from './Skeleton'
 import SortButton from './SortButton'
+import StockPill from './StockPill'
 
 const PAGE_SIZE = 50
 
@@ -73,9 +74,7 @@ export default function NameResults() {
   let body
   if (names.status === 'loading') {
     body = (
-      <div className="card-body">
-        <Loader text={t('names.loading')} />
-      </div>
+      <Skeleton text={t('names.loading')} />
     )
   } else if (names.status === 'failed') {
     body = (
@@ -143,7 +142,7 @@ export default function NameResults() {
           </div>
         ) : (
           <div className="list-group list-group-flush">
-            <div className="list-group-item d-flex justify-content-between gap-3 bg-body-tertiary">
+            <div className="list-group-item list-header d-flex justify-content-between gap-3">
               <SortButton
                 label={t('names.colBrand')}
                 orders={BRAND_ORDERS}
@@ -166,14 +165,10 @@ export default function NameResults() {
               >
                 <span>
                   <span className="fw-semibold">{item.brand}</span>
-                  <span className="small text-body-secondary ms-2">{item.number}</span>
+                  <span className="part-number text-body-secondary ms-2">{item.number}</span>
                   <span className="d-block">{item.name}</span>
                 </span>
-                <span
-                  className={`badge rounded-pill text-nowrap ${item.count > 0 ? 'text-bg-success' : 'text-bg-light border'}`}
-                >
-                  {item.count > 0 ? t('common.pcs', { count: item.count }) : t('common.outOfStock')}
-                </span>
+                <StockPill count={item.count} />
               </button>
             ))}
           </div>
@@ -192,9 +187,9 @@ export default function NameResults() {
   }
 
   return (
-    <section className="card shadow-sm">
+    <section className="card">
       <div className="card-header bg-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <h2 className="h6 mb-0">{t('names.title')}</h2>
+        <h2 className="section-title mb-0">{t('names.title')}</h2>
         <span className="small text-body-secondary">«{query}»</span>
       </div>
       {body}

@@ -10,7 +10,7 @@ const MIN_AUTO_LENGTH = 3
 
 export default function SearchForm() {
   const dispatch = useDispatch()
-  const { t, lang } = useT()
+  const { t } = useT()
   const isLoading = useSelector(
     ({ search }) => search.brands.status === 'loading' || search.names.status === 'loading',
   )
@@ -34,9 +34,7 @@ export default function SearchForm() {
     const normalized = normalizeNumber(text)
     if (!normalized) return
 
-    // В английской версии поиск только по артикулу: справочник названий русский
-    const mode = lang === 'ru' ? detectMode(normalized) : 'article'
-    if (mode === 'name') dispatch(searchByName(text.trim().replace(/\s+/g, ' ')))
+    if (detectMode(normalized) === 'name') dispatch(searchByName(text.trim().replace(/\s+/g, ' ')))
     else dispatch(fetchBrands({ number: normalized }))
   }
 
@@ -59,7 +57,7 @@ export default function SearchForm() {
   }
 
   return (
-    <form className="mb-4" role="search" onSubmit={handleSubmit}>
+    <form className="search-hero mb-4" role="search" onSubmit={handleSubmit}>
       <label htmlFor="part-number" className="form-label fw-semibold">
         {t('search.label')}
       </label>
@@ -88,7 +86,6 @@ export default function SearchForm() {
           )}
         </button>
       </div>
-      <div className="form-text">{t('search.hint')}</div>
     </form>
   )
 }
