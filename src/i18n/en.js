@@ -102,6 +102,7 @@ export default {
     'Stock is as of when the part was added to the catalog. Current prices and stock appear after you pick a part.',
 
   'shipment.orderBy': '{date}, order by {time}',
+  'shipment.cutoff': 'order by {time}',
 
   'errors.unknown': 'Something went wrong.',
   'errors.emptyKey': 'The API key is missing (FAVORIT_API_KEY).',

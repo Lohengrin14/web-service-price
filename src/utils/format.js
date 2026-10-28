@@ -47,11 +47,11 @@ const DATE_OPTIONS = {
 // Время в shipmentDate — московское «заказать до», его показываем как есть.
 // Через new Date(value) браузер сдвинул бы его на свой часовой пояс, поэтому дату
 // собираем из чисел в UTC и форматируем тоже в UTC — сдвига нет.
-export function formatShipment(value, lang = 'ru') {
-  if (!value) return ''
-
-  const parts = parseShipment(value)
-  if (!parts) return value
+// Возвращает { date: '02.11', time: '13:30' } (time пустой, если 00:00 или не указан);
+// null — если строку не разобрать.
+export function shipmentParts(value, lang = 'ru') {
+  const parts = value ? parseShipment(value) : null
+  if (!parts) return null
 
   const { year, month, day, hours, minutes } = parts
   const date = new Intl.DateTimeFormat(localeOf(lang), {
@@ -60,8 +60,18 @@ export function formatShipment(value, lang = 'ru') {
   }).format(Date.UTC(year, month - 1, day))
   const hasTime = hours !== undefined && !(Number(hours) === 0 && Number(minutes) === 0)
 
-  if (!hasTime) return date
-  return translate(lang, 'shipment.orderBy', { date, time: `${hours.padStart(2, '0')}:${minutes}` })
+  return { date, time: hasTime ? `${hours.padStart(2, '0')}:${minutes}` : '' }
+}
+
+// То же одной строкой: «02.11, заказ до 13:30»; незнакомый формат — как есть
+export function formatShipment(value, lang = 'ru') {
+  if (!value) return ''
+
+  const parts = shipmentParts(value, lang)
+  if (!parts) return value
+
+  const { date, time } = parts
+  return time ? translate(lang, 'shipment.orderBy', { date, time }) : date
 }
 
 // Дата отгрузки числом — для сортировки; null, если дату не разобрать

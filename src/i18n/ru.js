@@ -118,6 +118,7 @@ export default {
     'Остаток — на момент, когда деталь попала в справочник. Актуальные цены и остатки — после выбора детали.',
 
   'shipment.orderBy': '{date}, заказ до {time}',
+  'shipment.cutoff': 'заказ до {time}',
 
   'errors.unknown': 'Что-то пошло не так.',
   'errors.emptyKey': 'Не указан ключ API (FAVORIT_API_KEY).',

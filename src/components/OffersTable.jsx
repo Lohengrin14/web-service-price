@@ -3,12 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useT } from '../i18n'
 import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../store/filtersSlice'
 import { fetchOffers, selectSearch } from '../store/searchSlice'
-import { formatPrice, formatShipment } from '../utils/format'
+import { formatPrice } from '../utils/format'
 import CopyNumber from './CopyNumber'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
 import Skeleton from './Skeleton'
 import OfferFilters from './OfferFilters'
+import ShipmentInfo from './ShipmentInfo'
 import SortButton from './SortButton'
 import StockPill from './StockPill'
 
@@ -76,8 +77,6 @@ function OwnBadge() {
 function OfferRow({ offer, isBest }) {
   const { t, lang } = useT()
   const inStock = offer.stock > 0
-  const shipment = formatShipment(offer.shipmentDate, lang)
-  const warehouse = [offer.warehouse, shipment].filter(Boolean).join(' · ')
 
   return (
     <tr className={isBest ? 'offer-best' : inStock ? undefined : 'offer-muted'}>
@@ -110,10 +109,12 @@ function OfferRow({ offer, isBest }) {
           </div>
         )}
         {/* На узком экране склад и отгрузка показываются здесь, а не отдельной колонкой */}
-        {warehouse && (
+        {(offer.warehouse || offer.shipmentDate) && (
           <div className="small text-body-secondary d-md-none">
-            {warehouse}
+            {offer.warehouse}
             {offer.own && <OwnBadge />}
+            {offer.warehouse && offer.shipmentDate && ' · '}
+            <ShipmentInfo value={offer.shipmentDate} />
           </div>
         )}
       </td>
@@ -122,7 +123,11 @@ function OfferRow({ offer, isBest }) {
           {offer.warehouse || '—'}
           {offer.own && <OwnBadge />}
         </div>
-        {shipment && <div className="text-body-secondary text-nowrap">{shipment}</div>}
+        {offer.shipmentDate && (
+          <div className="text-body-secondary">
+            <ShipmentInfo value={offer.shipmentDate} />
+          </div>
+        )}
       </td>
       <td className="offer-stock text-end text-nowrap">
         <StockPill count={offer.stock} />
