@@ -1,0 +1,12 @@
+/* Позиции без остатка показываем приглушённым цветом */
+.offer-muted {
+  --bs-table-color: var(--bs-secondary-color);
+}
+
+/* На широком экране длинный список производителей прокручивается внутри карточки */
+@media (min-width: 992px) {
+  .brand-list {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}

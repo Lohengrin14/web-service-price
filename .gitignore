@@ -1,0 +1,24 @@
+# Зависимости и сборка
+node_modules
+dist
+dist-ssr
+*.local
+
+# Переменные окружения с ключом API
+.env
+.env.*
+!.env.example
+
+# Логи
+logs
+*.log
+npm-debug.log*
+
+# Редакторы и ОС
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Локальный план разработки
+ROADMAP.md
