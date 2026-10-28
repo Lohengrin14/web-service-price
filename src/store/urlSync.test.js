@@ -29,4 +29,9 @@ describe('searchToQuery', () => {
     expect(searchToQuery({ number: '01089', selected: null })).toBe('number=01089')
     expect(searchToQuery({ number: '', selected: null })).toBe('')
   })
+
+  it('сохраняет язык, если он не русский', () => {
+    expect(searchToQuery({ number: 'OC90', selected: null }, 'en')).toBe('number=OC90&lang=en')
+    expect(searchToQuery({ number: 'OC90', selected: null }, 'ru')).toBe('number=OC90')
+  })
 })

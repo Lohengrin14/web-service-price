@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useT } from '../i18n'
 import { fetchBrands, resetSearch, searchByName } from '../store/searchSlice'
 import { canonicalNumber, detectMode, normalizeNumber } from '../utils/format'
 
@@ -9,6 +10,7 @@ const MIN_AUTO_LENGTH = 3
 
 export default function SearchForm() {
   const dispatch = useDispatch()
+  const { t, lang } = useT()
   const isLoading = useSelector(
     ({ search }) => search.brands.status === 'loading' || search.names.status === 'loading',
   )
@@ -32,7 +34,9 @@ export default function SearchForm() {
     const normalized = normalizeNumber(text)
     if (!normalized) return
 
-    if (detectMode(normalized) === 'name') dispatch(searchByName(text.trim().replace(/\s+/g, ' ')))
+    // В английской версии поиск только по артикулу: справочник названий русский
+    const mode = lang === 'ru' ? detectMode(normalized) : 'article'
+    if (mode === 'name') dispatch(searchByName(text.trim().replace(/\s+/g, ' ')))
     else dispatch(fetchBrands({ number: normalized }))
   }
 
@@ -57,14 +61,14 @@ export default function SearchForm() {
   return (
     <form className="mb-4" role="search" onSubmit={handleSubmit}>
       <label htmlFor="part-number" className="form-label fw-semibold">
-        Артикул или название детали
+        {t('search.label')}
       </label>
       <div className="input-group input-group-lg">
         <input
           id="part-number"
           type="search"
           className="form-control"
-          placeholder="Например, 01089 или колодки"
+          placeholder={t('search.placeholder')}
           value={value}
           onChange={handleChange}
           autoComplete="off"
@@ -78,16 +82,13 @@ export default function SearchForm() {
           disabled={!value.trim()}
         >
           {isLoading ? (
-            <span className="spinner-border spinner-border-sm" aria-label="Идёт поиск" />
+            <span className="spinner-border spinner-border-sm" aria-label={t('search.loading')} />
           ) : (
-            'Найти'
+            t('search.submit')
           )}
         </button>
       </div>
-      <div className="form-text">
-        Поиск запускается сам через секунду после ввода, по Enter — сразу. Поиск по артикулу — полный.
-        По названию — по справочнику, результат может быть неполным.
-      </div>
+      <div className="form-text">{t('search.hint')}</div>
     </form>
   )
 }

@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { useT } from '../i18n'
 import {
   resetFilters,
   selectFilters,
@@ -15,21 +16,22 @@ import {
   toggleBrand,
   toggleCity,
 } from '../store/filtersSlice'
-import { pluralize } from '../utils/format'
 import CheckboxFilter from './CheckboxFilter'
 
+// Подписи — в словаре под ключами sort.<значение>
 const SORT_OPTIONS = [
-  ['default', 'По умолчанию'],
-  ['price-asc', 'Сначала дешёвые'],
-  ['price-desc', 'Сначала дорогие'],
-  ['stock-desc', 'Больше остаток'],
-  ['stock-asc', 'Меньше остаток'],
-  ['shipment-asc', 'Раньше отгрузка'],
-  ['shipment-desc', 'Позже отгрузка'],
+  'default',
+  'price-asc',
+  'price-desc',
+  'stock-desc',
+  'stock-asc',
+  'shipment-asc',
+  'shipment-desc',
 ]
 
 export default function OfferFilters() {
   const dispatch = useDispatch()
+  const { t } = useT()
   const filters = useSelector(selectFilters)
   const brands = useSelector(selectOfferBrands)
   const cities = useSelector(selectOfferCities)
@@ -42,7 +44,7 @@ export default function OfferFilters() {
       <div className="row g-2">
         <div className="col-sm-6">
           <label htmlFor="price-min" className="form-label small mb-1">
-            Цена, ₽
+            {t('filters.price')}
           </label>
           <div className="input-group input-group-sm">
             <input
@@ -51,7 +53,7 @@ export default function OfferFilters() {
               min="0"
               inputMode="decimal"
               className="form-control"
-              placeholder="от"
+              placeholder={t('filters.priceFrom')}
               value={filters.minPrice}
               onChange={(event) => dispatch(setMinPrice(event.target.value))}
             />
@@ -60,8 +62,8 @@ export default function OfferFilters() {
               min="0"
               inputMode="decimal"
               className="form-control"
-              placeholder="до"
-              aria-label="Цена до"
+              placeholder={t('filters.priceTo')}
+              aria-label={t('filters.priceToLabel')}
               value={filters.maxPrice}
               onChange={(event) => dispatch(setMaxPrice(event.target.value))}
             />
@@ -69,7 +71,7 @@ export default function OfferFilters() {
         </div>
         <div className="col-sm-6">
           <label htmlFor="offer-sort" className="form-label small mb-1">
-            Сортировка
+            {t('filters.sort')}
           </label>
           <select
             id="offer-sort"
@@ -77,9 +79,9 @@ export default function OfferFilters() {
             value={filters.sort}
             onChange={(event) => dispatch(setSort(event.target.value))}
           >
-            {SORT_OPTIONS.map(([value, label]) => (
+            {SORT_OPTIONS.map((value) => (
               <option key={value} value={value}>
-                {label}
+                {t(`sort.${value}`)}
               </option>
             ))}
           </select>
@@ -89,8 +91,8 @@ export default function OfferFilters() {
       {brands.length > 1 && (
         <CheckboxFilter
           id="offer-brands"
-          title="Производители"
-          searchPlaceholder="Найти производителя"
+          title={t('brands.title')}
+          searchPlaceholder={t('filters.findBrand')}
           options={brands}
           checked={filters.brands}
           onToggle={(value) => dispatch(toggleBrand(value))}
@@ -100,9 +102,9 @@ export default function OfferFilters() {
       {cities.length > 1 && (
         <CheckboxFilter
           id="offer-cities"
-          title="Города"
-          searchPlaceholder="Найти город"
-          emptyLabel="Нет в наличии"
+          title={t('filters.cities')}
+          searchPlaceholder={t('filters.findCity')}
+          emptyLabel={t('filters.noWarehouse')}
           options={cities}
           checked={filters.cities}
           onToggle={(value) => dispatch(toggleCity(value))}
@@ -121,18 +123,18 @@ export default function OfferFilters() {
             onChange={(event) => dispatch(setInStockOnly(event.target.checked))}
           />
           <label htmlFor="in-stock-only" className="form-check-label small">
-            Только в наличии
+            {t('common.inStockOnly')}
           </label>
         </div>
         <div className="small text-body-secondary">
-          Подходит {shown} из {total} {pluralize(total, ['предложения', 'предложений', 'предложений'])}
+          {t('filters.matching', { shown, count: total })}
           <button
             type="button"
             className="btn btn-link btn-sm p-0 ms-2 align-baseline"
             disabled={!hasActiveFilters}
             onClick={() => dispatch(resetFilters())}
           >
-            Сбросить фильтры
+            {t('common.resetFilters')}
           </button>
         </div>
       </div>

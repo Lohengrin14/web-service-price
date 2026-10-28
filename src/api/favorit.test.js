@@ -22,17 +22,28 @@ describe('parseGoods', () => {
     expect(parseGoods({ goods: [empty] })).toEqual([])
   })
 
-  it('переводит известные ошибки API', () => {
+  it('превращает известные ошибки API в коды', () => {
+    expect.assertions(2)
     expect(() => parseGoods({ error: 'Invalid key client!' })).toThrow(ApiError)
-    expect(() => parseGoods({ error: 'Invalid key client!' })).toThrow(/Неверный ключ API/)
+    try {
+      parseGoods({ error: ['Empty key!', 'Request quota exceeded!'] })
+    } catch (error) {
+      expect(error.codes).toEqual(['emptyKey', 'quota'])
+    }
   })
 
-  it('показывает неизвестную ошибку как есть', () => {
-    expect(() => parseGoods({ error: 'Something odd' })).toThrow('Сервис вернул ошибку: Something odd')
+  it('неизвестную ошибку передаёт текстом в параметрах', () => {
+    try {
+      parseGoods({ error: 'Something odd' })
+    } catch (error) {
+      expect(error.codes).toEqual(['apiError'])
+      expect(error.params).toEqual({ text: 'Something odd' })
+    }
+    expect.assertions(2)
   })
 
   it('ругается на ответ неожиданного формата', () => {
-    expect(() => parseGoods({ foo: 1 })).toThrow(/неожиданного формата/)
+    expect(() => parseGoods({ foo: 1 })).toThrow('badFormat')
   })
 })
 

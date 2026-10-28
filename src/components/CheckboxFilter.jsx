@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../i18n'
 
 // Выпадающий список с галочками: поиск, «Выбрать всех» и остаток у каждого варианта.
 // options — [{ value, stock }], checked — отмеченные значения; никто не отмечен — значит все.
@@ -13,6 +14,7 @@ export default function CheckboxFilter({
   onToggle,
   onSetAll,
 }) {
+  const { t } = useT()
   // Поиск только сужает список галочек, сами фильтры он не меняет
   const [query, setQuery] = useState('')
   const normalizedQuery = query.trim().toLowerCase()
@@ -22,7 +24,9 @@ export default function CheckboxFilter({
 
   const allChecked = checked.length === options.length
   const summary =
-    checked.length > 0 && !allChecked ? `${checked.length} из ${options.length}` : `все (${options.length})`
+    checked.length > 0 && !allChecked
+      ? t('checkbox.some', { checked: checked.length, total: options.length })
+      : t('checkbox.all', { total: options.length })
 
   return (
     <details className="mt-2">
@@ -49,7 +53,7 @@ export default function CheckboxFilter({
             onChange={(event) => onSetAll(event.target.checked ? options.map(({ value }) => value) : [])}
           />
           <label htmlFor={`${id}-all`} className="form-check-label small text-nowrap">
-            Выбрать всех
+            {t('checkbox.selectAll')}
           </label>
         </div>
       </div>
@@ -71,12 +75,14 @@ export default function CheckboxFilter({
             {/* У пустого значения подпись уже всё объясняет, остаток не дублируем */}
             {value && (
               <span className="small text-body-secondary text-nowrap">
-                {stock > 0 ? `${stock} шт.` : 'нет в наличии'}
+                {stock > 0 ? t('common.pcs', { count: stock }) : t('common.outOfStock')}
               </span>
             )}
           </div>
         ))}
-        {matching.length === 0 && <div className="small text-body-secondary">Ничего не найдено.</div>}
+        {matching.length === 0 && (
+          <div className="small text-body-secondary">{t('common.nothingFound')}</div>
+        )}
       </div>
     </details>
   )
