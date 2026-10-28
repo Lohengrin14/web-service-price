@@ -1,5 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { extractBrands, extractOffers, requestGoods } from '../api/favorit'
+import { canonicalNumber } from '../utils/format'
+
+const isSameNumber = (a, b) => canonicalNumber(a) === canonicalNumber(b)
 
 // Этап 2: предложения и аналоги по номеру и бренду
 export const fetchOffers = createAsyncThunk(
@@ -8,32 +11,35 @@ export const fetchOffers = createAsyncThunk(
   {
     condition: ({ number, brand }, { getState }) => {
       const { selected, offers } = getState().search
-      const isSame = selected?.number === number && selected?.brand === brand
+      const isSame = isSameNumber(selected?.number, number) && selected?.brand === brand
       return !(isSame && offers.status !== 'failed')
     },
   },
 )
 
-// Этап 1: производители по артикулу
+// Этап 1: производители по артикулу.
+// brand — необязательный производитель, которого открыть сразу (например, из ссылки).
 export const fetchBrands = createAsyncThunk(
   'search/fetchBrands',
-  async (number, { dispatch, getState, requestId }) => {
+  async ({ number, brand }, { dispatch, getState, requestId }) => {
     const brands = extractBrands(await requestGoods({ number }))
 
-    // Сразу открываем первого производителя (с наибольшим остатком), чтобы не ждать клика.
-    // Только если за это время не начали новый поиск.
-    const [first] = brands
-    if (first && getState().search.brands.requestId === requestId) {
-      dispatch(fetchOffers({ number: first.number, brand: first.brand }))
+    // Сразу открываем производителя из ссылки, а если его нет — первого (с наибольшим остатком),
+    // чтобы не ждать клика. Только если за это время не начали новый поиск.
+    const preferred = brand?.toUpperCase()
+    const target = brands.find((item) => item.brand.toUpperCase() === preferred) ?? brands[0]
+    if (target && getState().search.brands.requestId === requestId) {
+      dispatch(fetchOffers({ number: target.number, brand: target.brand }))
     }
 
     return brands
   },
   {
-    // Не повторяем запрос по артикулу, который уже найден или ищется (кроме повтора после ошибки)
-    condition: (number, { getState }) => {
+    // Не повторяем запрос по артикулу, который уже найден или ищется (кроме повтора после ошибки).
+    // Сравниваем только артикул: brand на список производителей не влияет.
+    condition: ({ number }, { getState }) => {
       const { search } = getState()
-      return !(number === search.number && search.brands.status !== 'failed')
+      return !(isSameNumber(number, search.number) && search.brands.status !== 'failed')
     },
   },
 )
@@ -61,7 +67,7 @@ const searchSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchBrands.pending, (state, action) => {
-        state.number = action.meta.arg
+        state.number = action.meta.arg.number
         state.selected = null
         state.brands = { ...emptyRequest, status: 'loading', requestId: action.meta.requestId }
         state.offers = emptyRequest

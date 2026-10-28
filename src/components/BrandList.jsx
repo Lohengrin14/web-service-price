@@ -31,7 +31,7 @@ export default function BrandList() {
   } else if (brands.status === 'failed') {
     body = (
       <div className="card-body">
-        <ErrorAlert message={brands.error} onRetry={() => dispatch(fetchBrands(number))} />
+        <ErrorAlert message={brands.error} onRetry={() => dispatch(fetchBrands({ number }))} />
       </div>
     )
   } else if (brands.items.length === 0) {

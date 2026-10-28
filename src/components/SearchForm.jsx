@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchBrands, resetSearch } from '../store/searchSlice'
+import { normalizeNumber } from '../utils/format'
 
 const DEBOUNCE_MS = 600
 const MIN_AUTO_LENGTH = 3
@@ -8,15 +9,24 @@ const MIN_AUTO_LENGTH = 3
 export default function SearchForm() {
   const dispatch = useDispatch()
   const isLoading = useSelector((state) => state.search.brands.status === 'loading')
-  const [value, setValue] = useState('')
+  const number = useSelector((state) => state.search.number)
+  const [value, setValue] = useState(number)
+  const [syncedNumber, setSyncedNumber] = useState(number)
   const timerRef = useRef(null)
+
+  // Поиск сменили не из поля (ссылка, кнопка «назад») — показываем в поле новый артикул.
+  // Если это тот же артикул, что уже набран, текст пользователя не трогаем.
+  if (number !== syncedNumber) {
+    setSyncedNumber(number)
+    if (normalizeNumber(value) !== number) setValue(number)
+  }
 
   useEffect(() => () => clearTimeout(timerRef.current), [])
 
   const search = (text) => {
     clearTimeout(timerRef.current)
-    const number = text.trim()
-    if (number) dispatch(fetchBrands(number))
+    const normalized = normalizeNumber(text)
+    if (normalized) dispatch(fetchBrands({ number: normalized }))
   }
 
   const handleChange = (event) => {

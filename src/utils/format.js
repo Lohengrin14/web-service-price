@@ -53,3 +53,16 @@ export function pluralize(count, [one, few, many]) {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
   return many
 }
+
+// Артикулы вводят как попало: «ОС 90 », «oc90». Приводим к одному виду,
+// чтобы один и тот же артикул не искался дважды и ссылка была чистой.
+export function normalizeNumber(value) {
+  return String(value ?? '').trim().replace(/\s+/g, ' ').toUpperCase()
+}
+
+// Ключ для сравнения артикулов: «OC 90», «OC-90» и «oc90» — один и тот же артикул,
+// API для них возвращает одно и то же. Только для дедупа запросов: в API, URL и поле
+// ввода уходит читаемый вид из normalizeNumber. Кириллицу тоже оставляем.
+export function canonicalNumber(value) {
+  return String(value ?? '').replace(/[^\p{L}\p{N}]/gu, '').toUpperCase()
+}

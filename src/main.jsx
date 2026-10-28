@@ -5,6 +5,9 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 import App from './App.jsx'
 import { store } from './store'
+import { startUrlSync } from './store/urlSync'
+
+startUrlSync(store)
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
