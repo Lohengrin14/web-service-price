@@ -54,10 +54,10 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
     deduplicated analogues; order: searched part, then in-stock, then by price.
 - `src/store/searchSlice.js` — state `{ number, selected: { brand, number }, brands, offers }`;
   `brands`/`offers` are `{ items, status: idle|loading|succeeded|failed, error, requestId }`.
-  Thunks `fetchBrands(number)`, `fetchOffers({ number, brand })`; `condition` blocks duplicate requests
+  Thunks `fetchBrands({ number, brand? })`, `fetchOffers({ number, brand })`; successful responses are cached in memory for 5 min (saves API quota); `condition` blocks duplicate requests
   (except retry after failure); stale responses are ignored via `requestId`; `resetSearch` action.
 - Step 2 is called with the `number` and `brand` **returned by step 1**, not the raw user input.
-- `src/components/` — `SearchForm` (debounced auto-search 600 ms from 3 chars, Enter = immediate,
+- `src/components/` — `SearchForm` (debounced auto-search 1000 ms from 3 chars, Enter = immediate,
   empty input resets), `BrandList`, `OffersTable`, `Loader`, `ErrorAlert` (with "Повторить").
 - `src/utils/format.js` — `formatPrice`, `formatShipment`, `pluralize`.
 - `App.jsx` — two columns (4/8) on wide screens; a single column when there are no brands or the request failed.

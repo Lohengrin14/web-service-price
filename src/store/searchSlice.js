@@ -4,10 +4,33 @@ import { canonicalNumber } from '../utils/format'
 
 const isSameNumber = (a, b) => canonicalNumber(a) === canonicalNumber(b)
 
+// Кэш ответов на время сессии: повтор того же запроса («назад», возврат к уже открытому
+// производителю) не тратит квоту API. Храним только успешные ответы, недолго и немного —
+// цены и остатки меняются.
+const CACHE_TTL_MS = 5 * 60 * 1000
+const CACHE_SIZE = 20
+const cache = new Map()
+
+async function cached(key, load) {
+  const hit = cache.get(key)
+  if (hit && Date.now() - hit.time < CACHE_TTL_MS) return hit.value
+
+  const value = await load()
+  cache.delete(key)
+  cache.set(key, { value, time: Date.now() })
+  if (cache.size > CACHE_SIZE) cache.delete(cache.keys().next().value)
+  return value
+}
+
+export const clearResponseCache = () => cache.clear()
+
 // Этап 2: предложения и аналоги по номеру и бренду
 export const fetchOffers = createAsyncThunk(
   'search/fetchOffers',
-  async ({ number, brand }) => extractOffers(await requestGoods({ number, brand, analogues: 'on' })),
+  async ({ number, brand }) =>
+    cached(`offers|${canonicalNumber(number)}|${brand.toUpperCase()}`, async () =>
+      extractOffers(await requestGoods({ number, brand, analogues: 'on' })),
+    ),
   {
     condition: ({ number, brand }, { getState }) => {
       const { selected, offers } = getState().search
@@ -22,7 +45,9 @@ export const fetchOffers = createAsyncThunk(
 export const fetchBrands = createAsyncThunk(
   'search/fetchBrands',
   async ({ number, brand }, { dispatch, getState, requestId }) => {
-    const brands = extractBrands(await requestGoods({ number }))
+    const brands = await cached(`brands|${canonicalNumber(number)}`, async () =>
+      extractBrands(await requestGoods({ number })),
+    )
 
     // Сразу открываем производителя из ссылки, а если его нет — первого (с наибольшим остатком),
     // чтобы не ждать клика. Только если за это время не начали новый поиск.

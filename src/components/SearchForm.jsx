@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchBrands, resetSearch } from '../store/searchSlice'
 import { normalizeNumber } from '../utils/format'
 
-const DEBOUNCE_MS = 600
+// Пауза после ввода перед автопоиском: меньше промежуточных запросов, пока человек печатает
+const DEBOUNCE_MS = 1000
 const MIN_AUTO_LENGTH = 3
 
 export default function SearchForm() {
@@ -77,7 +78,7 @@ export default function SearchForm() {
           )}
         </button>
       </div>
-      <div className="form-text">Поиск запускается сам через полсекунды после ввода, по Enter — сразу.</div>
+      <div className="form-text">Поиск запускается сам через секунду после ввода, по Enter — сразу.</div>
     </form>
   )
 }
