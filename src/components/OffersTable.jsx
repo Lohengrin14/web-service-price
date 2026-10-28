@@ -4,8 +4,10 @@ import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../st
 import { fetchOffers, selectSearch } from '../store/searchSlice'
 import { formatPrice, formatShipment, pluralize } from '../utils/format'
 import ErrorAlert from './ErrorAlert'
+import LoadMore from './LoadMore'
 import Loader from './Loader'
 import OfferFilters from './OfferFilters'
+import SortButton from './SortButton'
 
 const COLUMNS = 4
 // Большие выдачи (у OC90 больше 3 тыс. предложений) показываем порциями
@@ -13,7 +15,7 @@ const PAGE_SIZE = 50
 // Сколько аналогов должно быть подгружено, чтобы появилась кнопка «Наверх»
 const SCROLL_TOP_AFTER = 100
 
-// Порядок сортировки по клику на заголовок: первый клик — первый вариант, повторный — второй.
+// Порядок сортировки по клику на заголовок (см. SortButton).
 // Второе значение — по возрастанию ли (для стрелки и aria-sort).
 const PRICE_ORDERS = [
   ['price-asc', true],
@@ -31,9 +33,7 @@ const STOCK_ORDERS = [
 function SortHeader({ label, orders, className }) {
   const dispatch = useDispatch()
   const { sort } = useSelector(selectFilters)
-  const index = orders.findIndex(([value]) => value === sort)
-  const active = orders[index]
-  const next = orders[index === 0 ? 1 : 0][0]
+  const active = orders.find(([value]) => value === sort)
 
   return (
     <th
@@ -41,14 +41,12 @@ function SortHeader({ label, orders, className }) {
       className={className}
       aria-sort={active ? (active[1] ? 'ascending' : 'descending') : undefined}
     >
-      <button
-        type="button"
-        className="btn btn-link p-0 border-0 fw-bold text-reset text-decoration-none text-nowrap"
-        onClick={() => dispatch(setSort(next))}
-      >
-        {label}
-        {active && (active[1] ? ' ↑' : ' ↓')}
-      </button>
+      <SortButton
+        label={label}
+        orders={orders}
+        sort={sort}
+        onSort={(value) => dispatch(setSort(value))}
+      />
     </th>
   )
 }
@@ -82,30 +80,6 @@ function OfferRow({ offer }) {
       </td>
       <td className="text-end text-nowrap fw-semibold">{formatPrice(offer.price)}</td>
     </tr>
-  )
-}
-
-// Метка под таблицей: когда пользователь доскроллил до неё, подгружаем следующую порцию.
-// shown в зависимостях — после подгрузки пересоздаём наблюдатель: если метка всё ещё
-// на экране (высокий экран), он сразу сработает снова.
-function LoadMore({ shown, total, onLoad }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) onLoad()
-      },
-      { rootMargin: '300px' },
-    )
-    observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [shown, onLoad])
-
-  return (
-    <div ref={ref} className="card-footer bg-body small text-body-secondary text-center">
-      Показано аналогов: {shown} из {total}. Прокрутите ниже, чтобы увидеть ещё.
-    </div>
   )
 }
 
@@ -252,7 +226,12 @@ export default function OffersTable() {
           </button>
         )}
         {rest > 0 && (
-          <LoadMore shown={analogueRows.length} total={analogues.length} onLoad={showMore} />
+          <LoadMore
+            label="Показано аналогов"
+            shown={analogueRows.length}
+            total={analogues.length}
+            onLoad={showMore}
+          />
         )}
       </>
     )

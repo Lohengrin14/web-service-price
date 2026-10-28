@@ -1,49 +1,56 @@
 import { normalizeNumber } from '../utils/format'
-import { fetchBrands, resetSearch } from './searchSlice'
+import { fetchBrands, resetSearch, searchByName } from './searchSlice'
 
-// Состояние поиска в адресной строке: ?number=01089&brand=FEBI.
-// Ссылкой можно поделиться, а кнопка «назад» возвращает к предыдущему артикулу.
+// Состояние поиска в адресной строке: ?number=01089&brand=FEBI или ?q=колодки.
+// Ссылкой можно поделиться, а кнопка «назад» возвращает к предыдущему поиску —
+// например, от выбранной детали к списку найденного по названию.
 
 export function readSearch(search) {
   const params = new URLSearchParams(search)
   return {
+    query: (params.get('q') ?? '').trim().replace(/\s+/g, ' '),
     number: normalizeNumber(params.get('number')),
     brand: (params.get('brand') ?? '').trim(),
   }
 }
 
-export function searchToQuery({ number, selected }) {
+export function searchToQuery({ query, number, selected }) {
   const params = new URLSearchParams()
+  if (query) params.set('q', query)
   if (number) params.set('number', number)
   if (number && selected?.brand) params.set('brand', selected.brand)
   return params.toString()
 }
 
-function openSearch(store, { number, brand }) {
-  store.dispatch(number ? fetchBrands({ number, brand }) : resetSearch())
+function openSearch(store, { query, number, brand }) {
+  if (query) store.dispatch(searchByName(query))
+  else if (number) store.dispatch(fetchBrands({ number, brand }))
+  else store.dispatch(resetSearch())
 }
 
 export function startUrlSync(store) {
   // Открыли ссылку — восстанавливаем поиск
   const initial = readSearch(window.location.search)
-  if (initial.number) openSearch(store, initial)
+  if (initial.query || initial.number) openSearch(store, initial)
 
   // «Назад» и «вперёд» в браузере
   window.addEventListener('popstate', () => openSearch(store, readSearch(window.location.search)))
 
   store.subscribe(() => {
     const { search } = store.getState()
-    // Пока ищем производителей, адрес не трогаем: сразу запишем артикул вместе с производителем
-    if (search.brands.status === 'loading') return
+    // Пока ищем, адрес не трогаем: сразу запишем артикул вместе с производителем.
+    // Поиск по названию, не нашедший ничего, переходит в поиск по артикулу — его и запишем.
+    if (search.brands.status === 'loading' || search.names.status === 'loading') return
 
     const query = searchToQuery(search)
     const { location, history } = window
     if (query === location.search.slice(1)) return
 
     const url = `${location.pathname}${query ? `?${query}` : ''}${location.hash}`
-    // Новый артикул — новая запись в истории; другой производитель того же артикула — замена
-    const isNewNumber = readSearch(location.search).number !== search.number
-    if (isNewNumber) history.pushState(null, '', url)
+    // Новый поиск — новая запись в истории; другой производитель того же артикула — замена
+    const previous = readSearch(location.search)
+    const isNewSearch = previous.query !== search.query || previous.number !== search.number
+    if (isNewSearch) history.pushState(null, '', url)
     else history.replaceState(null, '', url)
   })
 }

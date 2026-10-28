@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   canonicalNumber,
+  detectMode,
   formatPrice,
   formatShipment,
   normalizeNumber,
@@ -63,5 +64,15 @@ describe('canonicalNumber', () => {
   it('сводит разные написания артикула к одному ключу', () => {
     expect(new Set(['OC 90', 'OC-90', 'OC90', ' oc.90 '].map(canonicalNumber))).toEqual(new Set(['OC90']))
     expect(canonicalNumber('ваз-2108')).toBe('ВАЗ2108')
+  })
+})
+
+describe('detectMode', () => {
+  it('с цифрами — артикул, без цифр — название', () => {
+    expect(detectMode('ОС90')).toBe('article') // кириллица, но API понимает
+    expect(detectMode('PB1-002')).toBe('article')
+    expect(detectMode('колодки')).toBe('name')
+    expect(detectMode('brake pads')).toBe('name')
+    expect(detectMode('колодки 2109')).toBe('article') // край: название с цифрами не поддерживаем
   })
 })

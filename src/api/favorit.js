@@ -12,7 +12,8 @@ const KNOWN_ERRORS = {
   'Empty key!': 'Не указан ключ API (FAVORIT_API_KEY).',
   'Invalid key client!': 'Неверный ключ API: покупатель не найден. Проверьте FAVORIT_API_KEY.',
   'Empty number goods!': 'Не указан номер детали.',
-  'Request quota exceeded!': 'Превышен лимит запросов к сервису. Попробуйте позже.',
+  // По документации квота действует на поиск грузовых запчастей
+  'Request quota exceeded!': 'Превышен лимит запросов по грузовому ассортименту. Попробуйте позже.',
 }
 
 export class ApiError extends Error {

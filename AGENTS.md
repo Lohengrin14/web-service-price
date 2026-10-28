@@ -59,6 +59,11 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
 - Step 2 is called with the `number` and `brand` **returned by step 1**, not the raw user input.
 - `src/components/` — `SearchForm` (debounced auto-search 1000 ms from 3 chars, Enter = immediate,
   empty input resets), `BrandList`, `OffersTable`, `Loader`, `ErrorAlert` (with "Повторить").
+- `src/catalog/` — name catalog for the name search: `seed.json` (collected once by
+  `scripts/build-seed.mjs`, at most 10 requests, passenger-car roots only) + a localStorage index filled
+  by `store/catalogListener.js` from regular API responses (no extra requests). Name search is a helper
+  without completeness guarantees, part number search is the main one; see ARCHITECTURE.md.
+- Search mode: digits → part number, no digits → catalog, empty catalog → fall back to part number.
 - `src/utils/format.js` — `formatPrice`, `formatShipment`, `pluralize`.
 - `App.jsx` — two columns (4/8) on wide screens; a single column when there are no brands or the request failed.
 
@@ -75,6 +80,8 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
 - "Not found" = `goods` with one empty structure. No stock = an item with zero stock.
 - Errors = a single `error` field, possibly several messages: `Empty key!`, `Invalid key client!`,
   `Empty number goods!`, `Request quota exceeded!`.
+- `Request quota exceeded!` is a per-client limit on **truck parts** lookups (per the docs). The demo key is
+  shared: never mass-query the API; keep scripts to a handful of passenger-car requests.
 - Not used yet (add only on request): `info=on` / `notRefund`, `rate`, `own`.
 - **The parser is written from the PDF only and has not been verified against the live API.**
   When live responses become available, compare them with `src/api/favorit.js`, fix the parser,

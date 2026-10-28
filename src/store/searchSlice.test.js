@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import searchReducer, { clearResponseCache, fetchBrands } from './searchSlice'
+import searchReducer, { clearResponseCache, fetchBrands, searchByName } from './searchSlice'
 
 const jsonResponse = (data) => new Response(JSON.stringify(data))
 
@@ -95,5 +95,44 @@ describe('fetchBrands', () => {
 
     expect(store.getState().search.selected).toBeNull()
     expect(store.getState().search.offers.status).toBe('idle')
+  })
+})
+
+describe('searchByName', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    clearResponseCache()
+  })
+
+  it('ищет по справочнику без запросов к API, сначала то, что было в наличии', async () => {
+    const fetch = vi.fn()
+    vi.stubGlobal('fetch', fetch)
+    const store = configureStore({ reducer: { search: searchReducer } })
+
+    await store.dispatch(searchByName('колодки'))
+
+    const { query, names } = store.getState().search
+    expect(query).toBe('колодки')
+    expect(names.status).toBe('succeeded')
+    expect(names.items.length).toBeGreaterThan(0)
+    expect(names.items.every((item) => /колодк/i.test(item.name))).toBe(true)
+    const firstEmpty = names.items.findIndex((item) => item.count === 0)
+    if (firstEmpty >= 0) expect(names.items.slice(firstEmpty).every((item) => item.count === 0)).toBe(true)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('если в справочнике пусто — пробует как артикул', async () => {
+    const fetch = vi.fn(async () => jsonResponse({ goods: [{ brand: '', number: '' }] }))
+    vi.stubGlobal('fetch', fetch)
+    const store = configureStore({ reducer: { search: searchReducer } })
+
+    await store.dispatch(searchByName('brake pads'))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    const { query, number, names } = store.getState().search
+    expect(fetch.mock.calls[0][0]).toContain('number=BRAKE+PADS')
+    expect(query).toBe('')
+    expect(names.status).toBe('idle')
+    expect(number).toBe('BRAKE PADS')
   })
 })

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { extractBrands, extractOffers, requestGoods } from '../api/favorit'
-import { canonicalNumber } from '../utils/format'
+import { searchCatalog } from '../catalog'
+import { canonicalNumber, normalizeNumber } from '../utils/format'
 
 const isSameNumber = (a, b) => canonicalNumber(a) === canonicalNumber(b)
 
@@ -69,11 +70,33 @@ export const fetchBrands = createAsyncThunk(
   },
 )
 
+// Поиск по названию — по справочнику, без запросов к API. Сначала то, что было в наличии.
+// Если в справочнике пусто, всё равно пробуем как артикул: вдруг это номер без цифр.
+export const searchByName = createAsyncThunk(
+  'search/searchByName',
+  async (query, { dispatch, getState, requestId }) => {
+    const found = await searchCatalog(query)
+    if (found.length === 0 && getState().search.names.requestId === requestId) {
+      dispatch(fetchBrands({ number: normalizeNumber(query), fromName: true }))
+    }
+    return [...found].sort((a, b) => (b.count > 0) - (a.count > 0))
+  },
+  {
+    condition: (query, { getState }) => {
+      const { search } = getState()
+      return !(query === search.query && search.names.status !== 'failed')
+    },
+  },
+)
+
 // status: 'idle' | 'loading' | 'succeeded' | 'failed'
 const emptyRequest = { items: [], status: 'idle', error: null, requestId: null }
 
 const initialState = {
+  query: '', // название последнего поиска по справочнику
+  names: emptyRequest, // найденные в справочнике детали: [{ name, number, brand, count }]
   number: '', // артикул последнего поиска
+  fromName: false, // поиск по артикулу запущен как откат после пустого поиска по названию
   selected: null, // выбранный производитель: { brand, number }
   brands: emptyRequest,
   offers: emptyRequest,
@@ -91,8 +114,27 @@ const searchSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(searchByName.pending, (state, action) => {
+        Object.assign(state, initialState)
+        state.query = action.meta.arg
+        state.names = { ...emptyRequest, status: 'loading', requestId: action.meta.requestId }
+      })
+      .addCase(searchByName.fulfilled, (state, action) => {
+        if (!isCurrent(state.names, action)) return
+        state.names.items = action.payload
+        state.names.status = 'succeeded'
+      })
+      .addCase(searchByName.rejected, (state, action) => {
+        if (!isCurrent(state.names, action)) return
+        state.names.status = 'failed'
+        state.names.error = action.error.message
+      })
+      // Поиск по артикулу (в том числе выбор детали из справочника) закрывает поиск по названию
       .addCase(fetchBrands.pending, (state, action) => {
+        state.query = ''
+        state.names = emptyRequest
         state.number = action.meta.arg.number
+        state.fromName = Boolean(action.meta.arg.fromName)
         state.selected = null
         state.brands = { ...emptyRequest, status: 'loading', requestId: action.meta.requestId }
         state.offers = emptyRequest
