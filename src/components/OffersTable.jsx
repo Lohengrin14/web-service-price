@@ -4,6 +4,7 @@ import { useT } from '../i18n'
 import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../store/filtersSlice'
 import { fetchOffers, selectSearch } from '../store/searchSlice'
 import { formatPrice, formatShipment } from '../utils/format'
+import CopyNumber from './CopyNumber'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
 import Skeleton from './Skeleton'
@@ -73,14 +74,16 @@ function OfferRow({ offer, isBest }) {
       <td>
         <div>
           <span className="fw-semibold">{offer.brand}</span>
-          <span className="part-number text-body-secondary ms-2">{offer.number}</span>
+          <span className="text-body-secondary ms-1">
+            <CopyNumber number={offer.number} />
+          </span>
           {isBest && (
             <span className="best-badge" title={t('offers.bestHint')}>
               {t('offers.best')}
             </span>
           )}
         </div>
-        <div>{offer.name || '—'}</div>
+        <div className="selectable">{offer.name || '—'}</div>
         {/* На узком экране склад и отгрузка показываются здесь, а не отдельной колонкой */}
         {warehouse && <div className="small text-body-secondary d-md-none">{warehouse}</div>}
       </td>
@@ -91,7 +94,9 @@ function OfferRow({ offer, isBest }) {
       <td className="offer-stock text-end text-nowrap">
         <StockPill count={offer.stock} />
       </td>
-      <td className="num text-end text-nowrap fw-semibold">{formatPrice(offer.price, lang)}</td>
+      <td className="num selectable text-end text-nowrap fw-semibold">
+        {formatPrice(offer.price, lang)}
+      </td>
     </tr>
   )
 }
@@ -258,7 +263,7 @@ export default function OffersTable() {
         <h2 className="section-title mb-0">{t('offers.title')}</h2>
         {selected && (
           <span className="small text-body-secondary">
-            {selected.brand} · <span className="part-number">{selected.number}</span>
+            {selected.brand} · <CopyNumber number={selected.number} />
           </span>
         )}
       </div>

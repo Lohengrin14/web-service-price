@@ -127,6 +127,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Подписи, заголовки и кнопки интерфейса не выделяются — выделение только мешает.
+   Выделять можно поля ввода и данные, которые копируют: артикулы, названия деталей, цены. */
+#root {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#root input,
+#root textarea,
+#root .part-number,
+#root .selectable {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 /* ---------- Шапка и подвал ---------- */
 .app-header {
   position: sticky;
@@ -141,14 +156,6 @@ body {
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-}
-
-.app-tagline {
-  margin-left: 0.5rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--ps-border);
-  color: var(--ps-muted);
-  font-size: 0.85rem;
 }
 
 /* Ссылки в шапке нейтральные: акцент — только лого-марка */
@@ -208,6 +215,27 @@ small {
   font-family: var(--ps-font-mono);
   font-size: 0.85em;
   letter-spacing: 0.01em;
+}
+
+/* Артикул-кнопка: клик копирует в буфер, на секунду вместо номера — «Скопировано!» */
+.copy-number {
+  padding: 0 0.25rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  cursor: copy;
+}
+
+.copy-number:hover {
+  background-color: var(--ps-hover);
+  color: var(--ps-text);
+}
+
+.copy-number.is-copied {
+  color: var(--ps-ok-text);
+  font-family: var(--ps-font);
+  font-weight: 600;
 }
 
 /* Цены и остатки — табличными цифрами, чтобы разряды стояли столбиком */
@@ -310,9 +338,41 @@ small {
   box-shadow: none;
 }
 
+.search-submit {
+  min-width: 7rem;
+}
+
+/* Примеры под полем — ссылки-кнопки: незнакомому с артикулами человеку есть что нажать */
+.search-examples {
+  margin-top: 0.5rem;
+  color: var(--ps-muted);
+  font-size: 0.85rem;
+}
+
+.search-examples .btn-link {
+  padding: 0;
+  border: 0;
+  font-size: inherit;
+  vertical-align: baseline;
+}
+
+.search-examples .btn-link.is-active {
+  color: var(--ps-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* На телефоне поле компактнее, а кнопка уже — чтобы подсказка в поле помещалась целиком */
 @media (max-width: 575.98px) {
   .search-hero .form-control {
     height: 2.75rem;
+    padding-inline: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .search-submit {
+    min-width: 0;
+    padding-inline: 0.875rem;
     font-size: 1rem;
   }
 }

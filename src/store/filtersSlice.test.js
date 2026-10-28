@@ -101,12 +101,11 @@ describe('filtersSlice', () => {
     ])
   })
 
-  it('собирает города складов с остатком, без товара — внизу', () => {
+  it('собирает города складов с остатком, без товара — внизу, без пустого города', () => {
     const cities = selectOfferCities({ search: { offers: { items } } })
     expect(cities).toEqual([
       { value: 'МСК', stock: 24 },
       { value: 'СПБ', stock: 3 },
-      { value: '', stock: 0 },
     ])
   })
 

@@ -5,7 +5,6 @@ export default {
   'app.subtitle': 'Search by part number or manufacturer to see prices, stock and analogues.',
   'app.language': 'Interface language',
 
-  'header.tagline': 'Auto parts and analogues search by part number',
   'header.nav': 'Links and settings',
 
   'footer.source': 'Data provided by the «Protsenka» service,',
@@ -17,9 +16,10 @@ export default {
   'theme.toLight': 'Switch to light theme',
 
   'search.label': 'Part number or manufacturer',
-  'search.placeholder': 'For example, 01089 or bosch',
+  'search.placeholder': 'Part number or brand',
   'search.submit': 'Search',
   'search.loading': 'Searching',
+  'search.examples': 'For example:',
 
   'common.loading': 'Loading…',
   'common.retry': 'Retry',
@@ -31,6 +31,9 @@ export default {
   'common.noFilterMatch': 'Nothing matches the selected filters.',
   'common.sortHint': 'Click to sort',
   'common.toTop': '↑ Back to top',
+
+  'copy.number': 'Copy part number',
+  'copy.done': 'Copied!',
 
   'checkbox.some': '{checked} of {total}',
   'checkbox.all': 'all ({total})',
@@ -69,7 +72,6 @@ export default {
   'filters.findBrand': 'Find a manufacturer',
   'filters.cities': 'Cities',
   'filters.findCity': 'Find a city',
-  'filters.noWarehouse': 'Out of stock',
   'filters.matching': { one: 'Matching: {shown} of {count} offer', other: 'Matching: {shown} of {count} offers' },
 
   'sort.default': 'Default',

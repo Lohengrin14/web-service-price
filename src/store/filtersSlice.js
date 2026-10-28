@@ -156,8 +156,12 @@ export const selectPriceScale = createSelector([selectOfferItems], (items) =>
   priceScale(items.map((offer) => offer.price).filter((price) => price !== null)),
 )
 
+// Предложения без склада (пустой город) в список городов не попадают: выбрать их по городу нельзя
 export const selectOfferCities = createSelector([selectOfferItems], (items) =>
-  summarizeStock(items, 'city'),
+  summarizeStock(
+    items.filter((offer) => offer.city),
+    'city',
+  ),
 )
 
 export const selectHasActiveFilters = (state) =>

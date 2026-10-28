@@ -17,8 +17,6 @@ export default function Header() {
         <div className="d-flex align-items-center gap-2 text-nowrap overflow-hidden">
           <LogoMark />
           <span className="app-wordmark">{APP_NAME}</span>
-          {/* На узком экране тэглайн прячем, чтобы шапка не переносилась */}
-          <span className="app-tagline d-none d-md-inline">{t('header.tagline')}</span>
         </div>
 
         <nav className="d-flex align-items-center gap-2 flex-shrink-0" aria-label={t('header.nav')}>
