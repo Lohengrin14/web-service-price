@@ -1,19 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { extractBrands, extractOffers, requestGoods } from '../api/favorit'
 
-// Этап 1: производители по артикулу
-export const fetchBrands = createAsyncThunk(
-  'search/fetchBrands',
-  async (number) => extractBrands(await requestGoods({ number })),
-  {
-    // Не повторяем запрос по артикулу, который уже найден или ищется (кроме повтора после ошибки)
-    condition: (number, { getState }) => {
-      const { search } = getState()
-      return !(number === search.number && search.brands.status !== 'failed')
-    },
-  },
-)
-
 // Этап 2: предложения и аналоги по номеру и бренду
 export const fetchOffers = createAsyncThunk(
   'search/fetchOffers',
@@ -23,6 +10,30 @@ export const fetchOffers = createAsyncThunk(
       const { selected, offers } = getState().search
       const isSame = selected?.number === number && selected?.brand === brand
       return !(isSame && offers.status !== 'failed')
+    },
+  },
+)
+
+// Этап 1: производители по артикулу
+export const fetchBrands = createAsyncThunk(
+  'search/fetchBrands',
+  async (number, { dispatch, getState, requestId }) => {
+    const brands = extractBrands(await requestGoods({ number }))
+
+    // Сразу открываем первого производителя (с наибольшим остатком), чтобы не ждать клика.
+    // Только если за это время не начали новый поиск.
+    const [first] = brands
+    if (first && getState().search.brands.requestId === requestId) {
+      dispatch(fetchOffers({ number: first.number, brand: first.brand }))
+    }
+
+    return brands
+  },
+  {
+    // Не повторяем запрос по артикулу, который уже найден или ищется (кроме повтора после ошибки)
+    condition: (number, { getState }) => {
+      const { search } = getState()
+      return !(number === search.number && search.brands.status !== 'failed')
     },
   },
 )

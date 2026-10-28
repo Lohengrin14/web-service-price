@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchBrands, fetchOffers, selectSearch } from '../store/searchSlice'
 import ErrorAlert from './ErrorAlert'
@@ -14,6 +15,11 @@ function StockBadge({ count }) {
 export default function BrandList() {
   const dispatch = useDispatch()
   const { number, selected, brands } = useSelector(selectSearch)
+  const [query, setQuery] = useState('')
+  const normalizedQuery = query.trim().toLowerCase()
+  const matchingBrands = normalizedQuery
+    ? brands.items.filter((item) => item.brand.toLowerCase().includes(normalizedQuery))
+    : brands.items
 
   let body
   if (brands.status === 'loading') {
@@ -36,29 +42,44 @@ export default function BrandList() {
     )
   } else {
     body = (
-      <div className="list-group list-group-flush brand-list">
-        {brands.items.map((item) => {
-          const isActive = selected?.brand === item.brand && selected?.number === item.number
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={`list-group-item list-group-item-action d-flex justify-content-between align-items-start gap-3${isActive ? ' active' : ''}`}
-              aria-pressed={isActive}
-              onClick={() => dispatch(fetchOffers({ number: item.number, brand: item.brand }))}
-            >
-              <span>
-                <span className="d-block fw-semibold">{item.brand}</span>
-                <span className="d-block small opacity-75">
-                  {item.number}
-                  {item.name && ` · ${item.name}`}
+      <>
+        <div className="card-body border-bottom py-2">
+          <input
+            type="search"
+            className="form-control form-control-sm"
+            placeholder="Поиск"
+            aria-label="Поиск производителя"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        {matchingBrands.length === 0 && (
+          <div className="card-body small text-body-secondary">Ничего не найдено.</div>
+        )}
+        <div className="list-group list-group-flush brand-list">
+          {matchingBrands.map((item) => {
+            const isActive = selected?.brand === item.brand && selected?.number === item.number
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={`list-group-item list-group-item-action d-flex justify-content-between align-items-start gap-3${isActive ? ' active' : ''}`}
+                aria-pressed={isActive}
+                onClick={() => dispatch(fetchOffers({ number: item.number, brand: item.brand }))}
+              >
+                <span>
+                  <span className="d-block fw-semibold">{item.brand}</span>
+                  <span className="d-block small opacity-75">
+                    {item.number}
+                    {item.name && ` · ${item.name}`}
+                  </span>
                 </span>
-              </span>
-              <StockBadge count={item.count} />
-            </button>
-          )
-        })}
-      </div>
+                <StockBadge count={item.count} />
+              </button>
+            )
+          })}
+        </div>
+      </>
     )
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatPrice, formatShipment, pluralize } from './format'
+import { formatPrice, formatShipment, pluralize, shipmentTime } from './format'
 
 describe('formatShipment', () => {
   it('понимает ISO и формат 1С', () => {
@@ -11,6 +11,15 @@ describe('formatShipment', () => {
     expect(formatShipment('2026-10-29T00:00:00')).toBe('29.10')
     expect(formatShipment('завтра')).toBe('завтра')
     expect(formatShipment('')).toBe('')
+  })
+})
+
+describe('shipmentTime', () => {
+  it('одинаково понимает ISO и формат 1С и не ломается на мусоре', () => {
+    expect(shipmentTime('2026-10-29T14:00:00')).toBe(shipmentTime('29.10.2026 14:00:00'))
+    expect(shipmentTime('2026-10-29')).toBeLessThan(shipmentTime('2026-10-29T09:00:00'))
+    expect(shipmentTime('завтра')).toBeNull()
+    expect(shipmentTime('')).toBeNull()
   })
 })
 
