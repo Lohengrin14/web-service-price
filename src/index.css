@@ -236,6 +236,21 @@ small {
   font-size: 1.125rem;
 }
 
+/* Поле и кнопка «Найти» подсвечиваются в фокусе одним кольцом, а не только поле */
+.search-hero .input-group {
+  border-radius: var(--bs-border-radius-lg);
+  transition: box-shadow 0.12s ease;
+}
+
+.search-hero .input-group:focus-within {
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+
+.search-hero .input-group .form-control:focus,
+.search-hero .input-group .btn:focus-visible {
+  box-shadow: none;
+}
+
 @media (max-width: 575.98px) {
   .search-hero .form-control {
     height: 2.75rem;
