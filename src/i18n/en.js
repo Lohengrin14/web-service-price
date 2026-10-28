@@ -4,6 +4,15 @@ export default {
   'app.title': 'Auto parts search',
   'app.subtitle': 'Search by part number or manufacturer to see prices, stock and analogues.',
   'app.language': 'Interface language',
+
+  'header.tagline': 'Auto parts and analogues search by part number',
+  'header.nav': 'Links and settings',
+
+  'footer.source': 'Data provided by the «Protsenka» service,',
+  'footer.sourceName': 'Favorit Avtozapchasti',
+  'footer.study': 'A study project. Test assignment.',
+  'footer.repository': 'Repository',
+  'footer.apiDocs': 'API documentation',
   'theme.toDark': 'Switch to dark theme',
   'theme.toLight': 'Switch to light theme',
 

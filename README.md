@@ -68,7 +68,9 @@ src/
   store/langSlice.js       выбранный язык
   store/catalogListener.js самообучение справочника по ответам API
   store/index.js           configureStore
+  config.js                имя продукта («Артикул») и внешние ссылки
   components/
+    Header.jsx, Footer.jsx шапка (лого, язык, тема, ссылки) и подвал (источник данных)
     SearchForm.jsx         поле артикула или названия, автопоиск после паузы в вводе
     NameResults.jsx        детали из справочника по названию
     BrandList.jsx          этап 1: список производителей

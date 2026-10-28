@@ -90,6 +90,7 @@
 /* ---------- Переменные Bootstrap → токены (для обеих тем) ---------- */
 :root,
 [data-bs-theme] {
+  --ps-header-height: 3.5rem;
   --ps-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --ps-font-mono: ui-monospace, SFMono-Regular, 'Cascadia Mono', Menlo, monospace;
 
@@ -124,6 +125,63 @@
 body {
   background-color: var(--ps-bg);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Шапка и подвал ---------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  height: var(--ps-header-height);
+  background-color: var(--ps-surface);
+  box-shadow: inset 0 -1px 0 var(--ps-border);
+}
+
+.app-wordmark {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-tagline {
+  margin-left: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--ps-border);
+  color: var(--ps-muted);
+  font-size: 0.85rem;
+}
+
+/* Ссылки в шапке нейтральные: акцент — только лого-марка */
+.header-link {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--bs-border-radius);
+  color: var(--ps-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.header-link:hover {
+  background-color: var(--ps-hover);
+  color: var(--ps-text);
+}
+
+.app-footer {
+  margin-top: 3rem;
+  padding-block: 1.5rem;
+  border-top: 1px solid var(--ps-border);
+  color: var(--ps-muted);
+  font-size: 0.8rem;
+}
+
+.app-footer a {
+  color: var(--ps-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.app-footer a:hover {
+  color: var(--ps-text);
 }
 
 /* ---------- Типографика ---------- */
@@ -271,9 +329,9 @@ small {
   padding: 0.75rem 1rem;
 }
 
-/* Кнопка «Наверх» возвращает к началу карточки предложений с небольшим отступом сверху */
+/* Кнопка «Наверх» возвращает к началу карточки предложений — под залипающую шапку */
 .offers-card {
-  scroll-margin-top: 1rem;
+  scroll-margin-top: calc(var(--ps-header-height) + 1rem);
 }
 
 /* ---------- Ползунок цены: два бегунка на одной шкале ---------- */
@@ -486,10 +544,10 @@ small {
   padding: 0.75rem 1rem;
 }
 
-/* Заголовок залипает при прокрутке длинной выдачи */
+/* Заголовок залипает при прокрутке длинной выдачи — сразу под залипающей шапкой */
 .offers-table thead th {
   position: sticky;
-  top: 0;
+  top: var(--ps-header-height);
   z-index: 2;
   background-color: var(--ps-surface);
   box-shadow: inset 0 -1px 0 var(--ps-border);
