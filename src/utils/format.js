@@ -66,3 +66,9 @@ export function normalizeNumber(value) {
 export function canonicalNumber(value) {
   return String(value ?? '').replace(/[^\p{L}\p{N}]/gu, '').toUpperCase()
 }
+
+// Режим поиска: есть цифры — это артикул (в том числе «ОС90» кириллицей — API его понимает),
+// нет цифр — ищем по справочнику названий. «Название + цифры» («колодки 2109») уходит в артикул.
+export function detectMode(text) {
+  return /\d/.test(text) ? 'article' : 'name'
+}
