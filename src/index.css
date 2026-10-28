@@ -258,6 +258,14 @@ small {
   box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
 }
 
+/* На время смены темы переходы выключены — иначе элементы догоняют фон и мерцают */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 /* ---------- Кнопки и поля ---------- */
 .btn,
 .form-control,

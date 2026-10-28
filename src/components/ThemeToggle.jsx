@@ -6,6 +6,16 @@ const STORAGE_KEY = 'parts-search:theme'
 // Тема уже выставлена до отрисовки скриптом в index.html: выбор пользователя, иначе системная
 const currentTheme = () => document.documentElement.getAttribute('data-bs-theme') ?? 'light'
 
+// Меняем тему без плавных переходов: иначе кнопки и поля догоняют фон с задержкой
+// и при переключении видно мерцание. Переходы возвращаем после отрисовки нового кадра.
+function applyTheme(theme) {
+  const root = document.documentElement
+  root.classList.add('theme-switching')
+  root.setAttribute('data-bs-theme', theme)
+  // Первый кадр рисуется уже в новой теме без переходов, со второго они снова работают
+  requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('theme-switching')))
+}
+
 function savedTheme() {
   try {
     return localStorage.getItem(STORAGE_KEY)
@@ -24,7 +34,7 @@ export default function ThemeToggle() {
     const followSystem = (event) => {
       if (savedTheme()) return
       const next = event.matches ? 'dark' : 'light'
-      document.documentElement.setAttribute('data-bs-theme', next)
+      applyTheme(next)
       setTheme(next)
     }
     media.addEventListener('change', followSystem)
@@ -33,7 +43,7 @@ export default function ThemeToggle() {
 
   const toggle = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
-    document.documentElement.setAttribute('data-bs-theme', next)
+    applyTheme(next)
     setTheme(next)
     try {
       localStorage.setItem(STORAGE_KEY, next)
