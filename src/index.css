@@ -3,6 +3,12 @@
   --bs-table-color: var(--bs-secondary-color);
 }
 
+/* Длинный список галочек в фильтре (производители, города) прокручивается */
+.checkbox-filter-options {
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
 /* На широком экране длинный список производителей прокручивается внутри карточки */
 @media (min-width: 992px) {
   .brand-list {

@@ -5,7 +5,7 @@ import SearchForm from './components/SearchForm'
 import { selectSearch } from './store/searchSlice'
 
 export default function App() {
-  const { brands } = useSelector(selectSearch)
+  const { number, brands } = useSelector(selectSearch)
   // Если производителей не нашлось или запрос упал, правая колонка не нужна
   const showOffers =
     brands.status === 'loading' || (brands.status === 'succeeded' && brands.items.length > 0)
@@ -24,7 +24,8 @@ export default function App() {
       {brands.status !== 'idle' && (
         <div className="row g-4">
           <div className={showOffers ? 'col-lg-4' : 'col-12'}>
-            <BrandList />
+            {/* key: при новом артикуле строка поиска по производителям очищается */}
+            <BrandList key={number} />
           </div>
           {showOffers && (
             <div className="col-lg-8">

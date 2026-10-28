@@ -45,6 +45,9 @@ function toNumber(value) {
   return Number.isFinite(number) ? number : null
 }
 
+// Город склада — первое слово кода: «МСК РС» → «МСК», «РнД РС» → «РНД»
+const cityOf = (code) => (code || '').trim().split(/\s+/)[0].toUpperCase()
+
 const partKey = (item) => `${item.brand ?? ''}|${item.number ?? ''}`.toUpperCase()
 
 function parseJson(text) {
@@ -126,7 +129,10 @@ export function extractBrands(goods) {
     }
   }
 
-  return [...brands.values()].sort((a, b) => a.brand.localeCompare(b.brand, 'ru'))
+  // Сначала с наибольшим остатком, без товара — внизу; при равном остатке — по алфавиту
+  return [...brands.values()].sort(
+    (a, b) => b.count - a.count || a.brand.localeCompare(b.brand, 'ru'),
+  )
 }
 
 function compareOffers(a, b) {
@@ -167,6 +173,7 @@ export function extractOffers(goods) {
         price: null,
         stock: toNumber(part.count) ?? 0,
         warehouse: '',
+        city: '',
         shipmentDate: '',
       })
       return
@@ -180,6 +187,7 @@ export function extractOffers(goods) {
         price: toNumber(warehouse.price),
         stock: toNumber(warehouse.stock) ?? 0,
         warehouse: warehouse.code || '',
+        city: cityOf(warehouse.code),
         shipmentDate: warehouse.shipmentDate || '',
       })
     })

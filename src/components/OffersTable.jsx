@@ -1,10 +1,52 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../store/filtersSlice'
 import { fetchOffers, selectSearch } from '../store/searchSlice'
 import { formatPrice, formatShipment, pluralize } from '../utils/format'
 import ErrorAlert from './ErrorAlert'
 import Loader from './Loader'
+import OfferFilters from './OfferFilters'
 
 const COLUMNS = 4
+
+// Порядок сортировки по клику на заголовок: первый клик — первый вариант, повторный — второй.
+// Второе значение — по возрастанию ли (для стрелки и aria-sort).
+const PRICE_ORDERS = [
+  ['price-asc', true],
+  ['price-desc', false],
+]
+const SHIPMENT_ORDERS = [
+  ['shipment-asc', true],
+  ['shipment-desc', false],
+]
+const STOCK_ORDERS = [
+  ['stock-desc', false],
+  ['stock-asc', true],
+]
+
+function SortHeader({ label, orders, className }) {
+  const dispatch = useDispatch()
+  const { sort } = useSelector(selectFilters)
+  const index = orders.findIndex(([value]) => value === sort)
+  const active = orders[index]
+  const next = orders[index === 0 ? 1 : 0][0]
+
+  return (
+    <th
+      scope="col"
+      className={className}
+      aria-sort={active ? (active[1] ? 'ascending' : 'descending') : undefined}
+    >
+      <button
+        type="button"
+        className="btn btn-link p-0 border-0 fw-bold text-reset text-decoration-none text-nowrap"
+        onClick={() => dispatch(setSort(next))}
+      >
+        {label}
+        {active && (active[1] ? ' ↑' : ' ↓')}
+      </button>
+    </th>
+  )
+}
 
 function OfferRow({ offer }) {
   const inStock = offer.stock > 0
@@ -70,6 +112,7 @@ function OfferGroup({ title, offers, emptyText }) {
 export default function OffersTable() {
   const dispatch = useDispatch()
   const { selected, offers } = useSelector(selectSearch)
+  const visible = useSelector(selectVisibleOffers)
 
   let body
   if (!selected) {
@@ -92,31 +135,58 @@ export default function OffersTable() {
     )
   } else if (offers.items.length === 0) {
     body = <div className="card-body text-body-secondary">Предложений по этой детали не найдено.</div>
+  } else if (visible.length === 0) {
+    body = (
+      <>
+        <OfferFilters />
+        <div className="card-body text-body-secondary">
+          Под выбранные фильтры ничего не подошло.{' '}
+          <button
+            type="button"
+            className="btn btn-link p-0 align-baseline"
+            onClick={() => dispatch(resetFilters())}
+          >
+            Сбросить фильтры
+          </button>
+        </div>
+      </>
+    )
   } else {
-    const original = offers.items.filter((offer) => offer.isOriginal)
-    const analogues = offers.items.filter((offer) => !offer.isOriginal)
+    // Группы считаем по уже отфильтрованному и отсортированному списку
+    const original = visible.filter((offer) => offer.isOriginal)
+    const analogues = visible.filter((offer) => !offer.isOriginal)
+    const hasOriginal = offers.items.some((offer) => offer.isOriginal)
+    const hasAnalogues = offers.items.some((offer) => !offer.isOriginal)
 
     body = (
-      <div className="table-responsive">
-        <table className="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th scope="col">Деталь</th>
-              <th scope="col" className="d-none d-md-table-cell">
-                Склад, отгрузка
-              </th>
-              <th scope="col" className="text-end">
-                Остаток
-              </th>
-              <th scope="col" className="text-end">
-                Цена
-              </th>
-            </tr>
-          </thead>
-          {original.length > 0 && <OfferGroup title="Искомая деталь" offers={original} />}
-          <OfferGroup title="Аналоги" offers={analogues} emptyText="Аналогов не найдено." />
-        </table>
-      </div>
+      <>
+        <OfferFilters />
+        <div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Деталь</th>
+                <SortHeader
+                  label="Склад, отгрузка"
+                  orders={SHIPMENT_ORDERS}
+                  className="d-none d-md-table-cell"
+                />
+                <SortHeader label="Остаток" orders={STOCK_ORDERS} className="text-end" />
+                <SortHeader label="Цена" orders={PRICE_ORDERS} className="text-end" />
+              </tr>
+            </thead>
+            {/* Искомую деталь фильтры тоже скрывают, но секция остаётся, чтобы это было видно */}
+            {hasOriginal && (
+              <OfferGroup title="Искомая деталь" offers={original} emptyText="Скрыта фильтрами." />
+            )}
+            <OfferGroup
+              title="Аналоги"
+              offers={analogues}
+              emptyText={hasAnalogues ? 'Под фильтры не подошёл ни один аналог.' : 'Аналогов не найдено.'}
+            />
+          </table>
+        </div>
+      </>
     )
   }
 

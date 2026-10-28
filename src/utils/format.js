@@ -6,22 +6,43 @@ export function formatPrice(price) {
 
 // shipmentDate — дата отгрузки и время, до которого нужно сделать заказ.
 // Понимает ISO (2026-10-28T14:00:00) и формат 1С (28.10.2026 14:00:00).
-// Год не показываем: отгрузка всегда в ближайшие дни.
+function parseShipment(value) {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{1,2}):(\d{2}))?/.exec(value)
+  if (iso) {
+    const [, year, month, day, hours, minutes] = iso
+    return { year, month, day, hours, minutes }
+  }
+
+  const ru = /^(\d{2})\.(\d{2})\.(\d{4})(?:[ T](\d{1,2}):(\d{2}))?/.exec(value)
+  if (ru) {
+    const [, day, month, year, hours, minutes] = ru
+    return { year, month, day, hours, minutes }
+  }
+
+  return null
+}
+
+// Год не показываем: отгрузка всегда в ближайшие дни
 export function formatShipment(value) {
   if (!value) return ''
 
-  const iso = /^\d{4}-(\d{2})-(\d{2})(?:[T ](\d{1,2}):(\d{2}))?/.exec(value)
-  const ru = /^(\d{2})\.(\d{2})\.\d{4}(?:[ T](\d{1,2}):(\d{2}))?/.exec(value)
+  const parts = parseShipment(value)
+  if (!parts) return value
 
-  let day, month, hours, minutes
-  if (iso) [, month, day, hours, minutes] = iso
-  else if (ru) [, day, month, hours, minutes] = ru
-  else return value
-
+  const { day, month, hours, minutes } = parts
   const date = `${day}.${month}`
   const hasTime = hours !== undefined && !(Number(hours) === 0 && Number(minutes) === 0)
 
   return hasTime ? `${date}, заказ до ${hours.padStart(2, '0')}:${minutes}` : date
+}
+
+// Дата отгрузки числом — для сортировки; null, если дату не разобрать
+export function shipmentTime(value) {
+  const parts = value ? parseShipment(value) : null
+  if (!parts) return null
+
+  const { year, month, day, hours = 0, minutes = 0 } = parts
+  return Date.UTC(year, month - 1, day, hours, minutes)
 }
 
 // pluralize(5, ['деталь', 'детали', 'деталей']) → 'деталей'

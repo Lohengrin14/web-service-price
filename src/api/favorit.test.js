@@ -43,8 +43,20 @@ describe('extractBrands', () => {
       { brand: 'CAFFARO', number: '0189', name: 'Ролик', count: 0 },
       { brand: 'ZEN', number: '0189', name: 'Бендикс', count: 3 },
     ])
-    expect(brands.map((b) => b.brand)).toEqual(['CAFFARO', 'ZEN'])
-    expect(brands[1].count).toBe(5)
+    expect(brands.map((b) => [b.brand, b.count])).toEqual([
+      ['ZEN', 5],
+      ['CAFFARO', 0],
+    ])
+  })
+
+  it('сортирует по остатку, без товара — внизу, при равенстве — по алфавиту', () => {
+    const brands = extractBrands([
+      { brand: 'AP', number: '1', count: 0 },
+      { brand: 'OSSCA', number: '1', count: 50 },
+      { brand: 'FEBI', number: '1', count: 845 },
+      { brand: 'ASAM', number: '1', count: 0 },
+    ])
+    expect(brands.map((b) => b.brand)).toEqual(['FEBI', 'OSSCA', 'AP', 'ASAM'])
   })
 })
 
@@ -63,7 +75,7 @@ describe('extractOffers', () => {
           number: 'HU7020Z',
           name: 'Фильтр масляный',
           count: 7,
-          warehouses: [warehouse('МС1', 990, 4), warehouse('СПБ', 700, 3)],
+          warehouses: [warehouse('МСК РС', 990, 4), warehouse('СПБ', 700, 3)],
         },
         { brand: 'FEBI', number: '38825', name: 'Фильтр масляный', count: 0, warehouses: [] },
         { brand: '', number: '', name: '' },
@@ -84,6 +96,11 @@ describe('extractOffers', () => {
       ['MANN', 990, 4],
       ['FEBI', null, 0],
     ])
+  })
+
+  it('берёт город склада из первого слова кода', () => {
+    const cities = extractOffers(response).map((offer) => offer.city)
+    expect(cities).toEqual(['МС2', 'СПБ', 'МСК', ''])
   })
 
   it('не дублирует деталь, если она попала и в goods, и в аналоги', () => {
