@@ -16,7 +16,9 @@ the guiding principle is **the simpler, the better**.
 ## Communication and language
 
 - Talk to the user in **Russian**.
-- UI text and code comments are in **Russian**. This file is the only English exception.
+- UI text and code comments are in **Russian**.
+- **Git commit messages, branch names and PR titles/descriptions are in English**, Conventional Commits
+  style (`feat:`, `fix:`, `refactor:`, `docs:`, `style:`, `test:`, `ci:`), e.g. `feat: add offer filters and sorting`.
 
 ## Stack and hard constraints
 
