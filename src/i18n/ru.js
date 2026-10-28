@@ -83,6 +83,8 @@ export default {
   'filters.findBrand': 'Найти производителя',
   'filters.cities': 'Города',
   'filters.findCity': 'Найти город',
+  'filters.ownOnly': 'Только свой склад',
+  'filters.returnableOnly': 'Без невозвратных',
   'filters.matching': {
     one: 'Подходит {shown} из {count} предложения',
     few: 'Подходит {shown} из {count} предложений',

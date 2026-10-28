@@ -12,7 +12,7 @@ import filtersReducer, {
 } from './filtersSlice'
 import { fetchOffers } from './searchSlice'
 
-const offer = (id, brand, price, stock, city, shipmentDate = '', isOriginal = false) => ({
+const offer = (id, brand, price, stock, city, shipmentDate = '', isOriginal = false, flags = {}) => ({
   id,
   brand,
   price,
@@ -20,6 +20,9 @@ const offer = (id, brand, price, stock, city, shipmentDate = '', isOriginal = fa
   city,
   shipmentDate,
   isOriginal,
+  own: false,
+  notRefund: false,
+  ...flags,
 })
 
 // Порядок как после extractOffers: искомая деталь, затем в наличии по цене, затем без остатка
@@ -72,6 +75,17 @@ describe('applyFilters', () => {
       'mann-spb',
       'febi',
     ])
+  })
+
+  it('оставляет только свои склады и скрывает невозвратные', () => {
+    const flagged = [
+      offer('own', 'A', 100, 1, 'МСК', '', false, { own: true }),
+      offer('own-no-refund', 'A', 90, 1, 'МСК', '', false, { own: true, notRefund: true }),
+      offer('partner', 'B', 80, 1, 'СПБ'),
+    ]
+    expect(ids(applyFilters(flagged, { ...noFilters, ownOnly: true }))).toEqual(['own', 'own-no-refund'])
+    expect(ids(applyFilters(flagged, { ...noFilters, returnableOnly: true }))).toEqual(['own', 'partner'])
+    expect(ids(applyFilters(flagged, { ...noFilters, ownOnly: true, returnableOnly: true }))).toEqual(['own'])
   })
 
   it('фильтрует по городам склада', () => {
