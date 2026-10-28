@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../store/filtersSlice'
 import { fetchOffers, selectSearch } from '../store/searchSlice'
@@ -7,6 +8,10 @@ import Loader from './Loader'
 import OfferFilters from './OfferFilters'
 
 const COLUMNS = 4
+// Большие выдачи (у OC90 больше 3 тыс. предложений) показываем порциями
+const PAGE_SIZE = 50
+// Сколько аналогов должно быть подгружено, чтобы появилась кнопка «Наверх»
+const SCROLL_TOP_AFTER = 100
 
 // Порядок сортировки по клику на заголовок: первый клик — первый вариант, повторный — второй.
 // Второе значение — по возрастанию ли (для стрелки и aria-sort).
@@ -80,7 +85,32 @@ function OfferRow({ offer }) {
   )
 }
 
-function OfferGroup({ title, offers, emptyText }) {
+// Метка под таблицей: когда пользователь доскроллил до неё, подгружаем следующую порцию.
+// shown в зависимостях — после подгрузки пересоздаём наблюдатель: если метка всё ещё
+// на экране (высокий экран), он сразу сработает снова.
+function LoadMore({ shown, total, onLoad }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) onLoad()
+      },
+      { rootMargin: '300px' },
+    )
+    observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [shown, onLoad])
+
+  return (
+    <div ref={ref} className="card-footer bg-body small text-body-secondary text-center">
+      Показано аналогов: {shown} из {total}. Прокрутите ниже, чтобы увидеть ещё.
+    </div>
+  )
+}
+
+// offers — вся группа (для счётчиков), rows — строки, которые видны на текущей странице
+function OfferGroup({ title, offers, rows = offers, emptyText }) {
   const parts = new Set(offers.map((offer) => offer.partKey)).size
 
   return (
@@ -97,7 +127,7 @@ function OfferGroup({ title, offers, emptyText }) {
         </th>
       </tr>
       {offers.length > 0 ? (
-        offers.map((offer) => <OfferRow key={offer.id} offer={offer} />)
+        rows.map((offer) => <OfferRow key={offer.id} offer={offer} />)
       ) : (
         <tr>
           <td colSpan={COLUMNS} className="text-body-secondary">
@@ -113,6 +143,26 @@ export default function OffersTable() {
   const dispatch = useDispatch()
   const { selected, offers } = useSelector(selectSearch)
   const visible = useSelector(selectVisibleOffers)
+  const [limit, setLimit] = useState(PAGE_SIZE)
+  const [limitFor, setLimitFor] = useState(visible)
+
+  const showMore = useCallback(() => setLimit((current) => current + PAGE_SIZE), [])
+  const sectionRef = useRef(null)
+  const [isFarBelow, setIsFarBelow] = useState(false)
+
+  // Ушли от начала карточки дальше, чем на экран вниз — пора показывать «Наверх»
+  useEffect(() => {
+    const handleScroll = () =>
+      setIsFarBelow(sectionRef.current.getBoundingClientRect().top < -window.innerHeight)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Новая выдача, фильтры или сортировка — снова показываем с первой порции
+  if (visible !== limitFor) {
+    setLimitFor(visible)
+    setLimit(PAGE_SIZE)
+  }
 
   let body
   if (!selected) {
@@ -152,9 +202,12 @@ export default function OffersTable() {
       </>
     )
   } else {
-    // Группы считаем по уже отфильтрованному и отсортированному списку
+    // Фильтры и сортировка уже применены ко всей выдаче, обрезаем под страницу в последнюю очередь.
+    // Искомая деталь видна всегда целиком, порциями показываем только аналоги.
     const original = visible.filter((offer) => offer.isOriginal)
     const analogues = visible.filter((offer) => !offer.isOriginal)
+    const analogueRows = analogues.slice(0, limit)
+    const rest = analogues.length - analogueRows.length
     const hasOriginal = offers.items.some((offer) => offer.isOriginal)
     const hasAnalogues = offers.items.some((offer) => !offer.isOriginal)
 
@@ -182,16 +235,31 @@ export default function OffersTable() {
             <OfferGroup
               title="Аналоги"
               offers={analogues}
+              rows={analogueRows}
               emptyText={hasAnalogues ? 'Под фильтры не подошёл ни один аналог.' : 'Аналогов не найдено.'}
             />
           </table>
         </div>
+        {/* Длинный список — даём быстро вернуться к фильтрам, не прокручивая всё назад */}
+        {isFarBelow && analogueRows.length >= SCROLL_TOP_AFTER && (
+          <button
+            type="button"
+            className="btn btn-primary rounded-pill shadow position-fixed bottom-0 end-0 m-3"
+            style={{ zIndex: 1030 }}
+            onClick={() => sectionRef.current.scrollIntoView({ behavior: 'smooth' })}
+          >
+            ↑ Наверх
+          </button>
+        )}
+        {rest > 0 && (
+          <LoadMore shown={analogueRows.length} total={analogues.length} onLoad={showMore} />
+        )}
       </>
     )
   }
 
   return (
-    <section className="card shadow-sm">
+    <section ref={sectionRef} className="card shadow-sm offers-card">
       <div className="card-header bg-body d-flex flex-wrap justify-content-between align-items-center gap-2">
         <h2 className="h6 mb-0">Предложения и аналоги</h2>
         {selected && (
