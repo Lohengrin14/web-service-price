@@ -23,15 +23,16 @@ export function normalizeText(text) {
 
 const tokenize = (text) => normalizeText(text).split(/[^\p{L}\p{N}]+/u).filter(Boolean)
 
-// Каждое слово запроса — начало какого-то слова названия, порядок слов не важен:
-// «фильтр масл» находит «Масляный фильтр»
+// Каждое слово запроса — начало какого-то слова названия или производителя, порядок слов
+// не важен: «фильтр масл» находит «Масляный фильтр», «колодки brembo» — колодки BREMBO
 export function findInCatalog(entries, query) {
   const queryTokens = tokenize(query)
   if (queryTokens.length === 0) return []
 
+  // Слова ищем и в названии, и в производителе: «bosch», «колодки brembo»
   return entries.filter((entry) => {
-    const nameTokens = tokenize(entry.name)
-    return queryTokens.every((token) => nameTokens.some((word) => word.startsWith(token)))
+    const words = [...tokenize(entry.name), ...tokenize(entry.brand)]
+    return queryTokens.every((token) => words.some((word) => word.startsWith(token)))
   })
 }
 

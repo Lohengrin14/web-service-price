@@ -1,14 +1,14 @@
 // English. Same keys as ru.js (checked by a test).
-// The English version searches by part number only, so its texts don't mention name search.
+// The English texts mention part number and manufacturer search only: part names in the catalog are Russian.
 export default {
   'app.title': 'Auto parts search',
-  'app.subtitle': 'Enter a part number and choose a manufacturer to see prices, stock and analogues.',
+  'app.subtitle': 'Search by part number or manufacturer to see prices, stock and analogues.',
   'app.language': 'Interface language',
   'theme.toDark': 'Switch to dark theme',
   'theme.toLight': 'Switch to light theme',
 
-  'search.label': 'Part number',
-  'search.placeholder': 'For example, 01089',
+  'search.label': 'Part number or manufacturer',
+  'search.placeholder': 'For example, 01089 or bosch',
   'search.submit': 'Search',
   'search.loading': 'Searching',
 
