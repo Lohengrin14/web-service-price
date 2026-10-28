@@ -40,7 +40,8 @@ export const fetchOffers = createAsyncThunk(
   async ({ number, brand }, { rejectWithValue }) => {
     try {
       return await cached(`offers|${canonicalNumber(number)}|${brand.toUpperCase()}`, async () =>
-        extractOffers(await requestGoods({ number, brand, analogues: 'on' })),
+        // info=on — чтобы API вернул признак невозвратности (notRefund)
+        extractOffers(await requestGoods({ number, brand, analogues: 'on', info: 'on' })),
       )
     } catch (error) {
       return rejectApiError(error, rejectWithValue)

@@ -63,6 +63,16 @@ function SortHeader({ label, orders, className }) {
   )
 }
 
+// Свой склад Фаворита — единственный «тёплый» бейдж: это плюс для покупателя
+function OwnBadge() {
+  const { t } = useT()
+  return (
+    <span className="meta-badge is-accent ms-1" title={t('offers.ownHint')}>
+      {t('offers.own')}
+    </span>
+  )
+}
+
 function OfferRow({ offer, isBest }) {
   const { t, lang } = useT()
   const inStock = offer.stock > 0
@@ -84,11 +94,34 @@ function OfferRow({ offer, isBest }) {
           )}
         </div>
         <div className="selectable">{offer.name || '—'}</div>
+        {/* Особенности предложения — мелко и только когда есть что сказать */}
+        {(offer.rate > 1 || offer.notRefund) && (
+          <div className="offer-meta">
+            {offer.rate > 1 && (
+              <span className="meta-badge" title={t('offers.rateHint', { count: offer.rate })}>
+                {t('offers.rate', { count: offer.rate })}
+              </span>
+            )}
+            {offer.notRefund && (
+              <span className="meta-badge" title={t('offers.notRefundHint')}>
+                {t('offers.notRefund')}
+              </span>
+            )}
+          </div>
+        )}
         {/* На узком экране склад и отгрузка показываются здесь, а не отдельной колонкой */}
-        {warehouse && <div className="small text-body-secondary d-md-none">{warehouse}</div>}
+        {warehouse && (
+          <div className="small text-body-secondary d-md-none">
+            {warehouse}
+            {offer.own && <OwnBadge />}
+          </div>
+        )}
       </td>
       <td className="small d-none d-md-table-cell">
-        <div>{offer.warehouse || '—'}</div>
+        <div>
+          {offer.warehouse || '—'}
+          {offer.own && <OwnBadge />}
+        </div>
         {shipment && <div className="text-body-secondary text-nowrap">{shipment}</div>}
       </td>
       <td className="offer-stock text-end text-nowrap">

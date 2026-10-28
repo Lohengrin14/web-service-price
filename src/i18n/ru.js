@@ -59,6 +59,12 @@ export default {
   'offers.noAnalogueMatch': 'Под фильтры не подошёл ни один аналог.',
   'offers.noAnalogues': 'Аналогов не найдено.',
   'offers.best': 'Лучшая цена',
+  'offers.rate': 'кратно {count}',
+  'offers.rateHint': 'Продаётся упаковками по {count} шт.',
+  'offers.own': 'свой склад',
+  'offers.ownHint': 'Товар на собственном складе Фаворита',
+  'offers.notRefund': 'невозвратная',
+  'offers.notRefundHint': 'Вернуть по причине «отказ» нельзя: товар или поставщик не принимает возврат',
   'offers.bestHint': 'Самое дешёвое предложение в наличии',
   'offers.parts': { one: '{count} деталь', few: '{count} детали', many: '{count} деталей', other: '{count} детали' },
   'offers.count': {
