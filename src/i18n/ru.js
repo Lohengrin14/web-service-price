@@ -2,16 +2,24 @@
 // Значение — строка с подстановками {name} или формы для Intl.PluralRules по {count}.
 export default {
   'app.title': 'Поиск автозапчастей',
-  'app.subtitle':
-    'Введите артикул, название или производителя — покажем цены, остатки и аналоги.',
+  'app.subtitle': 'Введите артикул, название или производителя — покажем цены, остатки и аналоги.',
   'app.language': 'Язык интерфейса',
+
+  'header.nav': 'Ссылки и настройки',
+
+  'footer.source': 'Данные предоставляет сервис «Проценка»,',
+  'footer.sourceName': 'Favorit Автозапчасти',
+  'footer.study': 'Учебный проект. Тестовое задание.',
+  'footer.repository': 'Репозиторий',
+  'footer.apiDocs': 'Документация API',
   'theme.toDark': 'Включить тёмную тему',
   'theme.toLight': 'Включить светлую тему',
 
   'search.label': 'Артикул, название или производитель',
-  'search.placeholder': 'Например, 01089, колодки или bosch',
+  'search.placeholder': 'Артикул, название, бренд',
   'search.submit': 'Найти',
   'search.loading': 'Идёт поиск',
+  'search.examples': 'Например:',
 
   'common.loading': 'Загрузка…',
   'common.retry': 'Повторить',
@@ -23,6 +31,9 @@ export default {
   'common.noFilterMatch': 'Под выбранные фильтры ничего не подошло.',
   'common.sortHint': 'Нажмите, чтобы отсортировать',
   'common.toTop': '↑ Наверх',
+
+  'copy.number': 'Скопировать артикул',
+  'copy.done': 'Скопировано!',
 
   'checkbox.some': '{checked} из {total}',
   'checkbox.all': 'все ({total})',
@@ -66,7 +77,6 @@ export default {
   'filters.findBrand': 'Найти производителя',
   'filters.cities': 'Города',
   'filters.findCity': 'Найти город',
-  'filters.noWarehouse': 'Нет в наличии',
   'filters.matching': {
     one: 'Подходит {shown} из {count} предложения',
     few: 'Подходит {shown} из {count} предложений',

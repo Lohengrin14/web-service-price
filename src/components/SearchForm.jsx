@@ -8,9 +8,16 @@ import { canonicalNumber, detectMode, normalizeNumber } from '../utils/format'
 const DEBOUNCE_MS = 1000
 const MIN_AUTO_LENGTH = 3
 
+// Примеры запросов, которые точно что-то находят: артикул, название, производитель.
+// В английской версии без русского названия — названия деталей в справочнике русские.
+const EXAMPLES = {
+  ru: ['01089', 'колодки', 'bosch'],
+  en: ['01089', 'bosch'],
+}
+
 export default function SearchForm() {
   const dispatch = useDispatch()
-  const { t } = useT()
+  const { t, lang } = useT()
   const isLoading = useSelector(
     ({ search }) => search.brands.status === 'loading' || search.names.status === 'loading',
   )
@@ -51,6 +58,14 @@ export default function SearchForm() {
     }
   }
 
+  // Пример, который сейчас в поле, подсвечиваем — видно, на что нажали
+  const isCurrent = (example) => canonicalNumber(example) === canonicalNumber(value)
+
+  const searchExample = (example) => {
+    setValue(example)
+    search(example)
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
     search(value)
@@ -58,7 +73,8 @@ export default function SearchForm() {
 
   return (
     <form className="search-hero mb-4" role="search" onSubmit={handleSubmit}>
-      <label htmlFor="part-number" className="form-label fw-semibold">
+      {/* Что вводить, сказано в плейсхолдере; подпись остаётся для экранных дикторов */}
+      <label htmlFor="part-number" className="visually-hidden">
         {t('search.label')}
       </label>
       <div className="input-group input-group-lg">
@@ -75,8 +91,7 @@ export default function SearchForm() {
         />
         <button
           type="submit"
-          className="btn btn-primary"
-          style={{ minWidth: '7rem' }}
+          className="btn btn-primary search-submit"
           disabled={!value.trim()}
         >
           {isLoading ? (
@@ -85,6 +100,22 @@ export default function SearchForm() {
             t('search.submit')
           )}
         </button>
+      </div>
+      <div className="search-examples">
+        {t('search.examples')}{' '}
+        {(EXAMPLES[lang] ?? EXAMPLES.ru).map((example, index) => (
+          <span key={example}>
+            {index > 0 && <span aria-hidden="true"> · </span>}
+            <button
+              type="button"
+              className={`btn btn-link${isCurrent(example) ? ' is-active' : ''}`}
+              aria-current={isCurrent(example) || undefined}
+              onClick={() => searchExample(example)}
+            >
+              {example}
+            </button>
+          </span>
+        ))}
       </div>
     </form>
   )

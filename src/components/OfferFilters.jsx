@@ -92,7 +92,6 @@ export default function OfferFilters() {
           id="offer-cities"
           title={t('filters.cities')}
           searchPlaceholder={t('filters.findCity')}
-          emptyLabel={t('filters.noWarehouse')}
           options={cities}
           checked={filters.cities}
           onToggle={(value) => dispatch(toggleCity(value))}
