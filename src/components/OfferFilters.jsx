@@ -125,7 +125,7 @@ export default function OfferFilters() {
           </label>
         </div>
         <div className="small text-body-secondary">
-          Показано {shown} из {total} {pluralize(total, ['предложения', 'предложений', 'предложений'])}
+          Подходит {shown} из {total} {pluralize(total, ['предложения', 'предложений', 'предложений'])}
           <button
             type="button"
             className="btn btn-link btn-sm p-0 ms-2 align-baseline"

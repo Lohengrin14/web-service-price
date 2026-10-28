@@ -1,11 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import searchReducer, { fetchBrands } from './searchSlice'
+import searchReducer, { clearResponseCache, fetchBrands } from './searchSlice'
 
 const jsonResponse = (data) => new Response(JSON.stringify(data))
 
 describe('fetchBrands', () => {
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    clearResponseCache()
+  })
 
   it('сразу загружает предложения первого производителя — с наибольшим остатком', async () => {
     const fetch = vi.fn(async (url) =>
@@ -59,6 +62,29 @@ describe('fetchBrands', () => {
     await store.dispatch(fetchBrands({ number: 'OC 90', brand: 'MAHLE' }))
 
     expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('берёт повторный поиск из кэша и не тратит квоту API', async () => {
+    const fetch = vi.fn(async (url) =>
+      url.includes('analogues=on')
+        ? jsonResponse({ goods: [] })
+        : jsonResponse({ goods: [{ brand: 'MAHLE', number: url.includes('OC90') ? 'OC90' : 'W712', count: 1 }] }),
+    )
+    vi.stubGlobal('fetch', fetch)
+    const store = configureStore({ reducer: { search: searchReducer } })
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+    await store.dispatch(fetchBrands({ number: 'OC90' }))
+    await settle()
+    await store.dispatch(fetchBrands({ number: 'W712' }))
+    await settle()
+    expect(fetch).toHaveBeenCalledTimes(4) // производители и предложения для двух артикулов
+
+    // «Назад» к первому артикулу — ни одного нового запроса
+    await store.dispatch(fetchBrands({ number: 'oc-90' }))
+    await settle()
+    expect(fetch).toHaveBeenCalledTimes(4)
+    expect(store.getState().search.selected).toEqual({ brand: 'MAHLE', number: 'OC90' })
   })
 
   it('ничего не выбирает, если производителей нет', async () => {
