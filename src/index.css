@@ -167,11 +167,12 @@ body {
 }
 
 .app-footer {
-  margin-top: 3rem;
-  padding-block: 1.5rem;
+  margin-top: 2.5rem;
+  padding-block: 1rem;
   border-top: 1px solid var(--ps-border);
   color: var(--ps-muted);
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
 .app-footer a {
