@@ -1,10 +1,15 @@
 // Клиент сервиса «Проценка» Фаворит Автозапчасти.
 // Документация: https://lk.favorit-parts.ru/static/wsprice.pdf
 //
-// Браузер обращается к прокси (/api/search), прокси добавляет ключ и пересылает запрос в API.
+// Обычно браузер обращается к прокси (/api/search), прокси добавляет ключ и пересылает запрос в API.
+// В статической сборке для GitHub Pages прокси нет: VITE_API_URL указывает прямо на API
+// (он работает по HTTPS и разрешает CORS), а ключ — публичный демо-ключ из документации.
 // Здесь же весь разбор ответа: остальное приложение формат API не знает.
 
+import { PUBLIC_DEMO_KEY } from '../config'
+
 const API_URL = import.meta.env.VITE_API_URL || '/api/search'
+const DEMO_KEY = import.meta.env.VITE_USE_DEMO_KEY === 'true' ? PUBLIC_DEMO_KEY : ''
 const TIMEOUT_MS = 15_000
 
 // Ошибки из документации → коды. Текст для пользователя берётся из словаря (src/i18n, errors.*),
@@ -87,6 +92,7 @@ export async function requestGoods(params) {
   for (const [name, value] of Object.entries(params)) {
     if (value) query.set(name, value) // URLSearchParams сам экранирует #, & и прочие спецсимволы
   }
+  if (DEMO_KEY) query.set('key', DEMO_KEY)
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)

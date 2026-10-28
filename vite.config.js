@@ -44,6 +44,8 @@ export default defineConfig(({ mode }) => {
   const proxy = createApiProxy(env)
 
   return {
+    // Для GitHub Pages сайт живёт в подпапке /<репозиторий>/ — путь задаёт сборка (BASE_PATH)
+    base: process.env.BASE_PATH || '/',
     plugins: [react()],
     server: { proxy },
     preview: { proxy },
