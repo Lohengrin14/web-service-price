@@ -6,6 +6,7 @@ import {
   formatPriceRound,
   formatShipment,
   normalizeNumber,
+  shipmentParts,
   shipmentTime,
 } from './format'
 
@@ -28,6 +29,15 @@ describe('shipmentTime', () => {
     expect(shipmentTime('2026-10-29')).toBeLessThan(shipmentTime('2026-10-29T09:00:00'))
     expect(shipmentTime('завтра')).toBeNull()
     expect(shipmentTime('')).toBeNull()
+  })
+})
+
+describe('shipmentParts', () => {
+  it('отдаёт дату и московское время «заказ до» отдельно, без сдвига пояса', () => {
+    expect(shipmentParts('2026-10-31T13:30:00+03:00')).toEqual({ date: '31.10', time: '13:30' })
+    expect(shipmentParts('2026-10-31T13:30:00+03:00', 'en')).toEqual({ date: 'Oct 31', time: '13:30' })
+    expect(shipmentParts('2026-10-29T00:00:00')).toEqual({ date: '29.10', time: '' })
+    expect(shipmentParts('завтра')).toBeNull()
   })
 })
 

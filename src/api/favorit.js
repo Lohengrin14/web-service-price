@@ -177,6 +177,7 @@ export function extractOffers(goods) {
       number: part.number ?? '',
       name: part.name ?? '',
       isOriginal,
+      rate: toNumber(part.rate), // кратность: продаётся упаковками по rate штук
     }
     const warehouses = Array.isArray(part.warehouses) ? part.warehouses : []
 
@@ -189,6 +190,8 @@ export function extractOffers(goods) {
         warehouse: '',
         city: '',
         shipmentDate: '',
+        own: false,
+        notRefund: Boolean(part.notRefund),
       })
       return
     }
@@ -203,6 +206,9 @@ export function extractOffers(goods) {
         warehouse: warehouse.code || '',
         city: cityOf(warehouse.code),
         shipmentDate: warehouse.shipmentDate || '',
+        own: Boolean(warehouse.own), // товар на собственном складе Фаворита
+        // Невозвратная: сам товар невозвратный (масла, жидкости) или поставщик не принимает возврат
+        notRefund: Boolean(part.notRefund || warehouse.notRefund),
       })
     })
   }

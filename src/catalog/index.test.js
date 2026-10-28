@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { MAX_LEARNED, findInCatalog, learn, mergeEntries, readLearned } from './index'
+import { MAX_LEARNED, findInCatalog, learn, mergeEntries, readLearned, searchCatalog } from './index'
 
 const entry = (brand, number, name, count = 0) => ({ brand, number, name, count })
 
@@ -87,5 +87,24 @@ describe('learn', () => {
     learn(many)
     expect(readLearned()).toHaveLength(MAX_LEARNED)
     expect(readLearned()[0].number).toBe('N10')
+  })
+})
+
+describe('searchCatalog', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('ищет и в стартовом справочнике, и в запомненном браузером', async () => {
+    const data = new Map()
+    vi.stubGlobal('localStorage', {
+      getItem: (key) => data.get(key) ?? null,
+      setItem: (key, value) => data.set(key, value),
+    })
+    learn([entry('TESTBRAND', 'T-1', 'Шестерёнка тестовая', 2)])
+
+    const learned = await searchCatalog('шестеренка тестов')
+    expect(numbers(learned)).toEqual(['T-1'])
+
+    const fromSeed = await searchCatalog('колодки')
+    expect(fromSeed.length).toBeGreaterThan(0)
   })
 })

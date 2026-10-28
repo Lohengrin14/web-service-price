@@ -4,7 +4,8 @@ import { defineConfig, loadEnv } from 'vite'
 const DEFAULT_API_URL = 'http://api.favorit-parts.ru/hs/hsprice/'
 
 // Параметры, которые браузер может передать в API. Ключ добавляет только прокси.
-const ALLOWED_PARAMS = ['number', 'brand', 'analogues']
+// info=on нужен, чтобы API вернул признак невозвратности notRefund.
+const ALLOWED_PARAMS = ['number', 'brand', 'analogues', 'info']
 
 // Браузер ходит на /api/search, а dev-сервер Vite пересылает запрос в API
 // и подставляет ключ. Так нет проблем с CORS и HTTP, а ключ не попадает в браузер.

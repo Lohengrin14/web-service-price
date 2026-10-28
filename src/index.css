@@ -19,6 +19,7 @@
   --ps-text: #0f172a;
   --ps-text-rgb: 15, 23, 42;
   --ps-muted: #64748b;
+  --ps-muted-strong: #475569;
   --ps-faint: #94a3b8;
   --ps-hover: rgba(148, 163, 184, 0.12);
 
@@ -48,6 +49,7 @@
   --ps-text: #f1f5f9;
   --ps-text-rgb: 241, 245, 249;
   --ps-muted: #94a3b8;
+  --ps-muted-strong: #94a3b8;
   --ps-faint: #64748b;
   --ps-hover: rgba(148, 163, 184, 0.08);
 
@@ -74,6 +76,7 @@
     --ps-text: #f1f5f9;
     --ps-text-rgb: 241, 245, 249;
     --ps-muted: #94a3b8;
+    --ps-muted-strong: #94a3b8;
     --ps-faint: #64748b;
     --ps-hover: rgba(148, 163, 184, 0.08);
     --ps-accent-text: #fbbf24;
@@ -547,6 +550,58 @@ small {
   padding: 0.75rem 1rem;
 }
 
+/* Строка производителя: кнопка выбора на всю ширину и иконка копирования справа */
+.brand-item {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.brand-item:hover {
+  background-color: var(--ps-hover);
+}
+
+.brand-select {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.75rem 0.5rem 0.75rem 1rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: start;
+}
+
+.brand-select:focus-visible {
+  outline-offset: -2px;
+  border-radius: 0.25rem;
+}
+
+.copy-icon {
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+  padding: 0.25rem 0.375rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--ps-faint);
+  line-height: 1;
+  cursor: copy;
+}
+
+.copy-icon:hover {
+  background-color: var(--ps-hover);
+  color: var(--ps-text);
+}
+
+.copy-icon.is-copied {
+  color: var(--ps-ok-text);
+  font-weight: 700;
+}
+
 /* Активный производитель — янтарный левый бордер и лёгкий тон, без синей заливки */
 .brand-list .list-group-item {
   border-left: 3px solid transparent;
@@ -637,9 +692,12 @@ small {
   --bs-table-color: var(--ps-muted);
 }
 
-/* Лучшее предложение — самое дешёвое в наличии: янтарный тон и левый бордер */
+/* Лучшее предложение — самое дешёвое в наличии: янтарный тон и левый бордер.
+   На янтарной подложке приглушённый текст темнее, иначе контраст ниже AA (4.4:1). */
 .offer-best {
   --bs-table-bg-type: var(--ps-accent-tint);
+  --ps-muted: var(--ps-muted-strong);
+  --bs-secondary-color: var(--ps-muted-strong);
 }
 
 .offer-best > td:first-child {
@@ -659,6 +717,47 @@ small {
   font-weight: 600;
   line-height: 1.4;
   vertical-align: 0.1em;
+}
+
+/* «Заказ до 13:30» — заметнее даты: от него зависит, уйдёт ли заказ сегодня */
+.shipment-cutoff {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  color: var(--ps-text);
+  font-weight: 500;
+}
+
+.shipment-cutoff svg {
+  color: var(--ps-accent-text);
+}
+
+/* Особенности предложения: кратность, невозвратность, свой склад — мелкие спокойные бейджи */
+.offer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.meta-badge {
+  display: inline-block;
+  padding: 0 0.375rem;
+  border: 1px solid var(--ps-border);
+  border-radius: 999px;
+  color: var(--ps-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+
+.meta-badge.is-accent {
+  border-color: var(--ps-accent-fill);
+  background-color: var(--ps-accent-tint);
+  color: var(--ps-accent-text);
 }
 
 /* Узкий экран: строки таблицы становятся карточками */

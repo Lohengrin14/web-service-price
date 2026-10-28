@@ -119,3 +119,34 @@ describe('extractOffers', () => {
     expect(offers.filter((offer) => offer.brand === 'MEYLE')).toHaveLength(1)
   })
 })
+
+describe('extractOffers: кратность, свой склад, невозвратность', () => {
+  const part = (overrides) => ({ brand: 'MANN', number: 'W712', name: 'Фильтр', count: 5, ...overrides })
+
+  it('пробрасывает кратность детали и признак своего склада', () => {
+    const [offer] = extractOffers([
+      part({ rate: '12', warehouses: [{ code: 'МСК', price: 100, stock: 5, own: true }] }),
+    ])
+    expect(offer).toMatchObject({ rate: 12, own: true })
+  })
+
+  it('невозвратная, если невозвратный товар или склад', () => {
+    const offers = extractOffers([
+      part({
+        notRefund: false,
+        warehouses: [
+          { code: 'МСК', price: 100, stock: 1, notRefund: true },
+          { code: 'СПБ', price: 110, stock: 1, notRefund: false },
+        ],
+      }),
+      part({ brand: 'FEBI', notRefund: true, warehouses: [{ code: 'МСК', price: 90, stock: 1 }] }),
+    ])
+    const byWarehouse = Object.fromEntries(offers.map((offer) => [`${offer.brand} ${offer.warehouse}`, offer.notRefund]))
+    expect(byWarehouse).toEqual({ 'MANN МСК': true, 'MANN СПБ': false, 'FEBI МСК': true })
+  })
+
+  it('без складов: свой склад — нет, невозвратность — по детали', () => {
+    const [offer] = extractOffers([part({ notRefund: true, rate: 1, warehouses: [] })])
+    expect(offer).toMatchObject({ own: false, notRefund: true, rate: 1, stock: 5, price: null })
+  })
+})
