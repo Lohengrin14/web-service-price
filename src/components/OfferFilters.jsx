@@ -44,7 +44,7 @@ export default function OfferFilters() {
 
   return (
     <div className="card-body border-bottom">
-      <div className="row g-2">
+      <div className="row gx-5 gy-3">
         {/* Ползунок нужен, только если в выдаче есть хотя бы две разные цены */}
         {priceScale && (
           <div className="col-sm-6">

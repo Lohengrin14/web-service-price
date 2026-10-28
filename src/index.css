@@ -236,10 +236,6 @@ small {
   font-size: 1.125rem;
 }
 
-.search-hero .form-text {
-  color: var(--ps-muted);
-}
-
 @media (max-width: 575.98px) {
   .search-hero .form-control {
     height: 2.75rem;

@@ -88,7 +88,6 @@ export default function SearchForm() {
           )}
         </button>
       </div>
-      <div className="form-text">{t('search.hint')}</div>
     </form>
   )
 }

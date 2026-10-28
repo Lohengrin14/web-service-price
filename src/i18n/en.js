@@ -11,7 +11,6 @@ export default {
   'search.placeholder': 'For example, 01089',
   'search.submit': 'Search',
   'search.loading': 'Searching',
-  'search.hint': 'Search starts a second after you stop typing, or right away when you press Enter.',
 
   'common.loading': 'Loading…',
   'common.retry': 'Retry',
