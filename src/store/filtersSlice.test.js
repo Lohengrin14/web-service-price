@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import filtersReducer, {
   applyFilters,
+  priceScale,
   selectHasActiveFilters,
   selectOfferBrands,
   selectOfferCities,
@@ -117,5 +118,20 @@ describe('filtersSlice', () => {
     const first = selectVisibleOffers(state)
     expect(ids(first)).toEqual(['meyle', 'mann-ms1'])
     expect(selectVisibleOffers({ ...state })).toBe(first)
+  })
+})
+
+describe('priceScale', () => {
+  it('округляет края наружу и берёт круглый шаг', () => {
+    expect(priceScale([139, 870.5, 2137])).toEqual({ min: 100, max: 2200, step: 50 })
+    expect(priceScale([597.86, 1067.26])).toEqual({ min: 580, max: 1080, step: 5 })
+    expect(priceScale([120.13, 754.8])).toEqual({ min: 120, max: 760, step: 10 })
+    expect(priceScale([3, 48])).toEqual({ min: 2, max: 48, step: 1 })
+  })
+
+  it('не нужен, если двигать нечего', () => {
+    expect(priceScale([])).toBeNull()
+    expect(priceScale([500])).toBeNull()
+    expect(priceScale([500, 500])).toBeNull()
   })
 })

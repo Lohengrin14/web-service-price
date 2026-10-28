@@ -3,6 +3,7 @@ import {
   canonicalNumber,
   detectMode,
   formatPrice,
+  formatPriceRound,
   formatShipment,
   normalizeNumber,
   shipmentTime,
@@ -34,6 +35,13 @@ describe('formatShipment по-английски', () => {
   it('переводит слова, но не сдвигает московское время на часовой пояс браузера', () => {
     expect(formatShipment('2026-10-31T13:30:00+03:00', 'en')).toBe('Oct 31, order by 13:30')
     expect(formatShipment('2026-10-31T13:30:00+03:00', 'ru')).toBe('31.10, заказ до 13:30')
+  })
+})
+
+describe('formatPriceRound', () => {
+  it('показывает цену без копеек', () => {
+    expect(formatPriceRound(2500).replace(/\s/g, ' ')).toBe('2 500 ₽')
+    expect(formatPriceRound(2500, 'en')).toBe('₽2,500')
   })
 })
 
