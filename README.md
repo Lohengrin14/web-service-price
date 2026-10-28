@@ -9,6 +9,9 @@
 2. Пользователь выбирает производителя — приложение показывает саму деталь и её аналоги: производитель, номер,
    название, склад и дату отгрузки, остаток и цену.
 
+Поиск по артикулу — основной и полный. Поиск по названию — вспомогательный, по
+встроенному справочнику, без гарантии полноты (подробнее в [ARCHITECTURE.md](ARCHITECTURE.md)).
+
 Стек: React 19, Redux Toolkit, Bootstrap 5, Vite. Без TypeScript.
 
 ## Запуск
@@ -47,15 +50,22 @@ FAVORIT_API_KEY=ваш-ключ
 ```
 src/
   api/favorit.js           запросы к API и разбор ответа
-  store/searchSlice.js     состояние двух этапов, thunk'и fetchBrands и fetchOffers
+  catalog/                 справочник названий: seed.json + самообучение в localStorage
+  store/searchSlice.js     состояние поиска, thunk'и searchByName, fetchBrands, fetchOffers
+  store/filtersSlice.js    фильтры и сортировка предложений
+  store/urlSync.js         состояние поиска в адресной строке
+  store/catalogListener.js самообучение справочника по ответам API
   store/index.js           configureStore
   components/
-    SearchForm.jsx         поле артикула, автопоиск после паузы в вводе
+    SearchForm.jsx         поле артикула или названия, автопоиск после паузы в вводе
+    NameResults.jsx        детали из справочника по названию
     BrandList.jsx          этап 1: список производителей
     OffersTable.jsx        этап 2: таблица предложений и аналогов
+    OfferFilters.jsx       фильтры и сортировка предложений
     Loader.jsx             индикатор загрузки
     ErrorAlert.jsx         сообщение об ошибке с кнопкой «Повторить»
-  utils/format.js          цена, дата отгрузки, склонения
+  utils/format.js          цена, дата отгрузки, склонения, нормализация артикула
+scripts/build-seed.mjs     одноразовый сбор стартового справочника через dev-прокси
 ```
 
 ## Состояния и ошибки
