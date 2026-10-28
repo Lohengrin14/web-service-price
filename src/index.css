@@ -21,3 +21,9 @@
 .offers-card {
   scroll-margin-top: 1rem;
 }
+
+/* Сортируемые заголовки: при наведении подчёркиваем, чтобы было видно, что это кнопка */
+.sort-button:hover .sort-label,
+.sort-button:focus-visible .sort-label {
+  text-decoration: underline;
+}

@@ -7,8 +7,27 @@ import CheckboxFilter from './CheckboxFilter'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
 import Loader from './Loader'
+import SortButton from './SortButton'
 
 const PAGE_SIZE = 50
+
+const byBrand = (a, b) => a.brand.localeCompare(b.brand, 'ru') || a.number.localeCompare(b.number, 'ru')
+const SORTERS = {
+  'brand-asc': byBrand,
+  'brand-desc': (a, b) => byBrand(b, a),
+  'count-desc': (a, b) => b.count - a.count || byBrand(a, b),
+  'count-asc': (a, b) => a.count - b.count || byBrand(a, b),
+}
+
+// Порядок по клику на заголовок (см. SortButton)
+const BRAND_ORDERS = [
+  ['brand-asc', true],
+  ['brand-desc', false],
+]
+const COUNT_ORDERS = [
+  ['count-desc', false],
+  ['count-asc', true],
+]
 
 const toggle = (list, value) =>
   list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
@@ -21,18 +40,22 @@ export default function NameResults() {
   // Фильтры живут только на этом экране; при новом поиске компонент создаётся заново (key в App)
   const [checkedBrands, setCheckedBrands] = useState([])
   const [inStockOnly, setInStockOnly] = useState(false)
+  const [sort, setSort] = useState('brand-asc') // по умолчанию — по производителю, А→Я
   const [limit, setLimit] = useState(PAGE_SIZE)
   const showMore = useCallback(() => setLimit((current) => current + PAGE_SIZE), [])
 
   const brandOptions = useMemo(() => summarizeStock(names.items, 'brand', 'count'), [names.items])
+  // Фильтруем и сортируем весь список, на страницу обрезаем в последнюю очередь
   const visible = useMemo(
     () =>
-      names.items.filter(
-        (item) =>
-          (!inStockOnly || item.count > 0) &&
-          (checkedBrands.length === 0 || checkedBrands.includes(item.brand)),
-      ),
-    [names.items, inStockOnly, checkedBrands],
+      names.items
+        .filter(
+          (item) =>
+            (!inStockOnly || item.count > 0) &&
+            (checkedBrands.length === 0 || checkedBrands.includes(item.brand)),
+        )
+        .sort(SORTERS[sort]),
+    [names.items, inStockOnly, checkedBrands, sort],
   )
 
   // Любая смена фильтров — снова с первой порции
@@ -72,10 +95,10 @@ export default function NameResults() {
     body = (
       <>
         <div className="card-body border-bottom">
-          <div className="alert alert-info small mb-0">
-            Поиск по справочнику, не подбор по авто. Одно название — сотни деталей; уточните бренд или
-            артикул.
-          </div>
+          <p className="small text-body-secondary mb-0">
+            Список по названию может быть неполным — он строится по справочнику. Полный список
+            предложений и аналогов — в поиске по артикулу.
+          </p>
           {brandOptions.length > 1 && (
             <CheckboxFilter
               id="name-brands"
@@ -125,6 +148,20 @@ export default function NameResults() {
           </div>
         ) : (
           <div className="list-group list-group-flush">
+            <div className="list-group-item d-flex justify-content-between gap-3 bg-body-tertiary">
+              <SortButton
+                label="Производитель"
+                orders={BRAND_ORDERS}
+                sort={sort}
+                onSort={(value) => changeFilters(() => setSort(value))}
+              />
+              <SortButton
+                label="Количество, шт."
+                orders={COUNT_ORDERS}
+                sort={sort}
+                onSort={(value) => changeFilters(() => setSort(value))}
+              />
+            </div>
             {rows.map((item) => (
               <button
                 key={`${item.brand}|${item.number}`}
