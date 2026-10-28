@@ -4,6 +4,8 @@ export default {
   'app.title': 'Auto parts search',
   'app.subtitle': 'Enter a part number and choose a manufacturer to see prices, stock and analogues.',
   'app.language': 'Interface language',
+  'theme.toDark': 'Switch to dark theme',
+  'theme.toLight': 'Switch to light theme',
 
   'search.label': 'Part number',
   'search.placeholder': 'For example, 01089',
@@ -45,6 +47,8 @@ export default {
   'offers.hiddenByFilters': 'Hidden by filters.',
   'offers.noAnalogueMatch': 'No analogues match the filters.',
   'offers.noAnalogues': 'No analogues found.',
+  'offers.best': 'Best price',
+  'offers.bestHint': 'The cheapest offer in stock',
   'offers.parts': { one: '{count} part', other: '{count} parts' },
   'offers.count': { one: '{count} offer', other: '{count} offers' },
   'offers.loadMore': 'Showing {shown} of {total} analogues. Scroll down to see more.',

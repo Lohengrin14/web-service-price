@@ -1,12 +1,334 @@
-/* Позиции без остатка показываем приглушённым цветом */
-.offer-muted {
-  --bs-table-color: var(--bs-secondary-color);
+/*
+ * Дизайн-система «освежённый утилитарный»: Bootstrap 5.3 остаётся основой,
+ * поверх него — тонкий слой токенов (--ps-*) и переопределение его CSS-переменных.
+ * Нейтраль — slate, единственный акцент — amber, зелёный и красный — только по смыслу.
+ *
+ * Контраст текста — не ниже AA (4.5:1). Поэтому в светлой теме ссылки и акцентный текст —
+ * amber-700 (#b45309), а #d97706 и #f59e0b — только заливки, рамки и фокус; текст «в наличии» —
+ * green-700, а #16a34a — точка-индикатор. В тёмной теме для текста — светлые оттенки.
+ */
+
+/* ---------- Токены: светлая тема ---------- */
+:root,
+[data-bs-theme='light'] {
+  --ps-bg: #f8fafc;
+  --ps-surface: #ffffff;
+  --ps-surface-rgb: 255, 255, 255;
+  --ps-surface-muted: #f8fafc;
+  --ps-border: #e2e8f0;
+  --ps-text: #0f172a;
+  --ps-text-rgb: 15, 23, 42;
+  --ps-muted: #64748b;
+  --ps-faint: #94a3b8;
+  --ps-hover: rgba(148, 163, 184, 0.12);
+
+  --ps-accent-fill: #f59e0b;
+  --ps-accent-strong: #d97706;
+  --ps-accent-text: #b45309;
+  --ps-accent-text-rgb: 180, 83, 9;
+  --ps-accent-hover-rgb: 146, 64, 14;
+  --ps-accent-tint: rgba(245, 158, 11, 0.1);
+  --ps-on-accent: #020617;
+
+  --ps-ok-dot: #16a34a;
+  --ps-ok-text: #15803d;
+  --ps-ok-tint: #dcfce7;
+  --ps-danger-text: #dc2626;
+
+  --ps-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
-/* Длинный список галочек в фильтре (производители, города) прокручивается */
-.checkbox-filter-options {
-  max-height: 10rem;
-  overflow-y: auto;
+/* ---------- Токены: тёмная тема ---------- */
+[data-bs-theme='dark'] {
+  --ps-bg: #0b1220;
+  --ps-surface: #111a2e;
+  --ps-surface-rgb: 17, 26, 46;
+  --ps-surface-muted: #0e1628;
+  --ps-border: #334155;
+  --ps-text: #f1f5f9;
+  --ps-text-rgb: 241, 245, 249;
+  --ps-muted: #94a3b8;
+  --ps-faint: #64748b;
+  --ps-hover: rgba(148, 163, 184, 0.08);
+
+  --ps-accent-text: #fbbf24;
+  --ps-accent-text-rgb: 251, 191, 36;
+  --ps-accent-hover-rgb: 252, 211, 77;
+  --ps-accent-tint: rgba(245, 158, 11, 0.14);
+
+  --ps-ok-text: #4ade80;
+  --ps-ok-tint: rgba(22, 163, 74, 0.16);
+  --ps-danger-text: #f87171;
+
+  --ps-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Без JavaScript атрибута темы нет — тогда уважаем системную настройку */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-bs-theme]) {
+    --ps-bg: #0b1220;
+    --ps-surface: #111a2e;
+    --ps-surface-rgb: 17, 26, 46;
+    --ps-surface-muted: #0e1628;
+    --ps-border: #334155;
+    --ps-text: #f1f5f9;
+    --ps-text-rgb: 241, 245, 249;
+    --ps-muted: #94a3b8;
+    --ps-faint: #64748b;
+    --ps-hover: rgba(148, 163, 184, 0.08);
+    --ps-accent-text: #fbbf24;
+    --ps-accent-text-rgb: 251, 191, 36;
+    --ps-accent-hover-rgb: 252, 211, 77;
+    --ps-accent-tint: rgba(245, 158, 11, 0.14);
+    --ps-ok-text: #4ade80;
+    --ps-ok-tint: rgba(22, 163, 74, 0.16);
+    --ps-danger-text: #f87171;
+    --ps-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ---------- Переменные Bootstrap → токены (для обеих тем) ---------- */
+:root,
+[data-bs-theme] {
+  --ps-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ps-font-mono: ui-monospace, SFMono-Regular, 'Cascadia Mono', Menlo, monospace;
+
+  --bs-body-font-family: var(--ps-font);
+  --bs-body-font-size: 0.95rem;
+  --bs-body-bg: var(--ps-surface);
+  --bs-body-bg-rgb: var(--ps-surface-rgb);
+  --bs-body-color: var(--ps-text);
+  --bs-body-color-rgb: var(--ps-text-rgb);
+  --bs-secondary-color: var(--ps-muted);
+  --bs-tertiary-color: var(--ps-faint);
+  --bs-secondary-bg: var(--ps-surface-muted);
+  --bs-tertiary-bg: var(--ps-surface-muted);
+  --bs-border-color: var(--ps-border);
+  --bs-border-color-translucent: var(--ps-border);
+
+  --bs-primary: var(--ps-accent-fill);
+  --bs-primary-rgb: 245, 158, 11;
+  --bs-success: var(--ps-ok-dot);
+  --bs-success-rgb: 22, 163, 74;
+  --bs-link-color: var(--ps-accent-text);
+  --bs-link-color-rgb: var(--ps-accent-text-rgb);
+  --bs-link-hover-color: rgb(var(--ps-accent-hover-rgb));
+  --bs-link-hover-color-rgb: var(--ps-accent-hover-rgb);
+  --bs-focus-ring-color: rgba(245, 158, 11, 0.45);
+
+  --bs-box-shadow-sm: var(--ps-shadow);
+  --bs-border-radius: 0.5rem;
+  --bs-border-radius-lg: 0.625rem;
+}
+
+body {
+  background-color: var(--ps-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Типографика ---------- */
+.app-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ps-muted);
+}
+
+.small,
+small {
+  font-size: 0.8rem;
+}
+
+/* Артикулы — моноширинным: так проще сверять символ за символом */
+.part-number {
+  font-family: var(--ps-font-mono);
+  font-size: 0.85em;
+  letter-spacing: 0.01em;
+}
+
+/* Цены и остатки — табличными цифрами, чтобы разряды стояли столбиком */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Фокус: видимое янтарное кольцо ---------- */
+:focus-visible {
+  outline: 2px solid var(--ps-accent-fill);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--ps-accent-fill);
+  outline: none;
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+
+/* ---------- Кнопки и поля ---------- */
+.btn,
+.form-control,
+.form-select,
+.list-group-item {
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+/* Основная кнопка — единственная яркая заливка; одинаковая в обеих темах */
+.btn-primary {
+  --bs-btn-color: var(--ps-on-accent);
+  --bs-btn-bg: #f59e0b;
+  --bs-btn-border-color: #f59e0b;
+  --bs-btn-hover-color: var(--ps-on-accent);
+  --bs-btn-hover-bg: #d97706;
+  --bs-btn-hover-border-color: #d97706;
+  --bs-btn-active-color: var(--ps-on-accent);
+  --bs-btn-active-bg: #d97706;
+  --bs-btn-active-border-color: #d97706;
+  --bs-btn-disabled-color: var(--ps-on-accent);
+  --bs-btn-disabled-bg: #f59e0b;
+  --bs-btn-disabled-border-color: #f59e0b;
+  --bs-btn-focus-shadow-rgb: 245, 158, 11;
+  font-weight: 600;
+}
+
+/* Второстепенные кнопки (язык, тема, «Наверх») — спокойные, на поверхности */
+.btn-quiet {
+  --bs-btn-color: var(--ps-text);
+  --bs-btn-bg: var(--ps-surface);
+  --bs-btn-border-color: var(--ps-border);
+  --bs-btn-hover-color: var(--ps-text);
+  --bs-btn-hover-bg: var(--ps-hover);
+  --bs-btn-hover-border-color: var(--ps-border);
+  --bs-btn-active-color: var(--ps-text);
+  --bs-btn-active-bg: var(--ps-accent-tint);
+  --bs-btn-active-border-color: var(--ps-accent-fill);
+}
+
+.btn-quiet[aria-pressed='true'] {
+  background-color: var(--ps-accent-tint);
+  border-color: var(--ps-accent-fill);
+  font-weight: 600;
+}
+
+.form-check-input:checked {
+  background-color: var(--ps-accent-fill);
+  border-color: var(--ps-accent-fill);
+}
+
+/* Бегунок переключателя в фокусе — янтарный, а не синий из Bootstrap */
+.form-switch .form-check-input:focus:not(:checked) {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23f59e0b'/%3e%3c/svg%3e");
+}
+
+/* ---------- Поиск — главный элемент страницы ---------- */
+.search-hero .form-control {
+  height: 3.25rem;
+  font-size: 1.125rem;
+}
+
+.search-hero .form-text {
+  color: var(--ps-muted);
+}
+
+@media (max-width: 575.98px) {
+  .search-hero .form-control {
+    height: 2.75rem;
+    font-size: 1rem;
+  }
+}
+
+/* ---------- Карточки ---------- */
+.card {
+  --bs-card-bg: var(--ps-surface);
+  --bs-card-border-color: var(--ps-border);
+  --bs-card-cap-bg: var(--ps-surface);
+  box-shadow: var(--ps-shadow);
+}
+
+.card-header,
+.card-footer {
+  padding: 0.75rem 1rem;
+}
+
+/* Кнопка «Наверх» возвращает к началу карточки предложений с небольшим отступом сверху */
+.offers-card {
+  scroll-margin-top: 1rem;
+}
+
+/* ---------- Наличие: пилюля с точкой ---------- */
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.stock-pill::before {
+  content: '';
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+}
+
+.stock-pill.is-in {
+  color: var(--ps-ok-text);
+  background-color: var(--ps-ok-tint);
+}
+
+.stock-pill.is-in::before {
+  background-color: var(--ps-ok-dot);
+}
+
+.stock-pill.is-out {
+  color: var(--ps-muted);
+  box-shadow: inset 0 0 0 1px var(--ps-border);
+}
+
+.stock-pill.is-out::before {
+  background-color: var(--ps-faint);
+}
+
+/* ---------- Списки: производители, детали из справочника ---------- */
+.list-group {
+  --bs-list-group-bg: var(--ps-surface);
+  --bs-list-group-border-color: var(--ps-border);
+  --bs-list-group-action-hover-bg: var(--ps-hover);
+  --bs-list-group-action-active-bg: var(--ps-accent-tint);
+  /* По умолчанию Bootstrap красит пункты-кнопки приглушённым цветом — нам нужен обычный текст */
+  --bs-list-group-action-color: var(--ps-text);
+  --bs-list-group-action-hover-color: var(--ps-text);
+  --bs-list-group-action-active-color: var(--ps-text);
+}
+
+.list-group-item-action {
+  padding: 0.75rem 1rem;
+}
+
+/* Активный производитель — янтарный левый бордер и лёгкий тон, без синей заливки */
+.brand-list .list-group-item {
+  border-left: 3px solid transparent;
+}
+
+.brand-list .list-group-item.active {
+  color: var(--ps-text);
+  background-color: var(--ps-accent-tint);
+  border-color: var(--ps-border);
+  border-left-color: var(--ps-accent-fill);
 }
 
 /* На широком экране длинный список производителей прокручивается внутри карточки */
@@ -17,13 +339,151 @@
   }
 }
 
-/* Кнопка «Наверх» возвращает к началу карточки предложений с небольшим отступом сверху */
-.offers-card {
-  scroll-margin-top: 1rem;
+.list-header {
+  background-color: var(--ps-surface-muted);
+}
+
+/* Длинный список галочек в фильтре (производители, города) прокручивается */
+.checkbox-filter-options {
+  max-height: 10rem;
+  overflow-y: auto;
 }
 
 /* Сортируемые заголовки: при наведении подчёркиваем, чтобы было видно, что это кнопка */
+.sort-button {
+  font-size: inherit;
+}
+
 .sort-button:hover .sort-label,
 .sort-button:focus-visible .sort-label {
   text-decoration: underline;
+}
+
+.sort-icon {
+  color: var(--ps-faint);
+}
+
+.sort-icon.is-active {
+  color: var(--ps-accent-text);
+}
+
+/* Скелетон загрузки — светлые полосы под цвет рамок, а не тёмно-серые */
+.skeleton {
+  color: var(--ps-faint);
+}
+
+/* ---------- Таблица предложений ---------- */
+.offers-table {
+  --bs-table-bg: var(--ps-surface);
+  --bs-table-color: var(--ps-text);
+  --bs-table-border-color: var(--ps-border);
+  --bs-table-hover-bg: var(--ps-hover);
+  --bs-table-hover-color: var(--ps-text);
+}
+
+.offers-table > :not(caption) > * > * {
+  padding: 0.75rem 1rem;
+}
+
+/* Заголовок залипает при прокрутке длинной выдачи */
+.offers-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--ps-surface);
+  box-shadow: inset 0 -1px 0 var(--ps-border);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.offer-group-row > th {
+  --bs-table-bg: var(--ps-surface-muted);
+  color: var(--ps-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding-block: 0.5rem;
+}
+
+/* Позиции без остатка показываем приглушённым цветом */
+.offer-muted {
+  --bs-table-color: var(--ps-muted);
+}
+
+/* Лучшее предложение — самое дешёвое в наличии: янтарный тон и левый бордер */
+.offer-best {
+  --bs-table-bg-type: var(--ps-accent-tint);
+}
+
+.offer-best > td:first-child {
+  box-shadow:
+    inset 3px 0 0 var(--ps-accent-fill),
+    inset 0 0 0 9999px var(--ps-accent-tint);
+}
+
+.best-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--ps-accent-fill);
+  color: var(--ps-accent-text);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: 0.1em;
+}
+
+/* Узкий экран: строки таблицы становятся карточками */
+@media (max-width: 767.98px) {
+  .offers-table thead {
+    display: none;
+  }
+
+  .offers-table,
+  .offers-table tbody {
+    display: block;
+  }
+
+  .offers-table tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--ps-border);
+  }
+
+  .offers-table > :not(caption) > * > * {
+    padding: 0;
+    border: 0;
+  }
+
+  .offers-table td:first-child {
+    grid-column: 1 / -1;
+    margin-bottom: 0.5rem;
+  }
+
+  .offers-table td.offer-stock {
+    text-align: start !important;
+  }
+
+  .offer-group-row {
+    display: block !important;
+    background-color: var(--ps-surface-muted);
+    padding-block: 0.5rem !important;
+  }
+
+  .offer-best {
+    background-color: var(--ps-accent-tint);
+    box-shadow: inset 3px 0 0 var(--ps-accent-fill);
+  }
+
+  .offer-best > td:first-child {
+    box-shadow: none;
+  }
+}
+
+/* ---------- Ошибки ---------- */
+.alert-danger {
+  --bs-alert-color: var(--ps-danger-text);
 }

@@ -4,6 +4,7 @@ import BrandList from './components/BrandList'
 import NameResults from './components/NameResults'
 import OffersTable from './components/OffersTable'
 import SearchForm from './components/SearchForm'
+import ThemeToggle from './components/ThemeToggle'
 import { LANGUAGES, useT } from './i18n'
 import { saveLanguage, setLanguage } from './store/langSlice'
 import { selectSearch } from './store/searchSlice'
@@ -27,21 +28,24 @@ export default function App() {
     <main className="container py-4 py-lg-5">
       <header className="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-3">
         <div>
-          <h1 className="h3 mb-1">{t('app.title')}</h1>
+          <h1 className="app-title mb-1">{t('app.title')}</h1>
           <p className="text-body-secondary mb-0">{t('app.subtitle')}</p>
         </div>
-        <div className="btn-group btn-group-sm" role="group" aria-label={t('app.language')}>
-          {LANGUAGES.map((code) => (
-            <button
-              key={code}
-              type="button"
-              className={`btn ${code === lang ? 'btn-secondary' : 'btn-outline-secondary'}`}
-              aria-pressed={code === lang}
-              onClick={() => dispatch(setLanguage(code))}
-            >
-              {code.toUpperCase()}
-            </button>
-          ))}
+        <div className="d-flex gap-2">
+          <div className="btn-group btn-group-sm" role="group" aria-label={t('app.language')}>
+            {LANGUAGES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className="btn btn-quiet"
+                aria-pressed={code === lang}
+                onClick={() => dispatch(setLanguage(code))}
+              >
+                {code.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 

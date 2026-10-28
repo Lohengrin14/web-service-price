@@ -4,6 +4,8 @@ export default {
   'app.title': 'Поиск автозапчастей',
   'app.subtitle': 'Введите артикул или название, выберите производителя — покажем цены, остатки и аналоги.',
   'app.language': 'Язык интерфейса',
+  'theme.toDark': 'Включить тёмную тему',
+  'theme.toLight': 'Включить светлую тему',
 
   'search.label': 'Артикул или название детали',
   'search.placeholder': 'Например, 01089 или колодки',
@@ -47,6 +49,8 @@ export default {
   'offers.hiddenByFilters': 'Скрыта фильтрами.',
   'offers.noAnalogueMatch': 'Под фильтры не подошёл ни один аналог.',
   'offers.noAnalogues': 'Аналогов не найдено.',
+  'offers.best': 'Лучшая цена',
+  'offers.bestHint': 'Самое дешёвое предложение в наличии',
   'offers.parts': { one: '{count} деталь', few: '{count} детали', many: '{count} деталей', other: '{count} детали' },
   'offers.count': {
     one: '{count} предложение',

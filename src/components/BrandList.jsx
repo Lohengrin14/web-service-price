@@ -3,16 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useT } from '../i18n'
 import { fetchBrands, fetchOffers, selectSearch } from '../store/searchSlice'
 import ErrorAlert from './ErrorAlert'
-import Loader from './Loader'
-
-function StockBadge({ count }) {
-  const { t } = useT()
-  return count > 0 ? (
-    <span className="badge rounded-pill text-bg-success text-nowrap">{t('common.pcs', { count })}</span>
-  ) : (
-    <span className="badge rounded-pill text-bg-light border text-nowrap">{t('common.outOfStock')}</span>
-  )
-}
+import Skeleton from './Skeleton'
+import StockPill from './StockPill'
 
 export default function BrandList() {
   const dispatch = useDispatch()
@@ -27,9 +19,7 @@ export default function BrandList() {
   let body
   if (brands.status === 'loading') {
     body = (
-      <div className="card-body">
-        <Loader text={t('brands.loading')} />
-      </div>
+      <Skeleton text={t('brands.loading')} rows={4} />
     )
   } else if (brands.status === 'failed') {
     body = (
@@ -74,12 +64,12 @@ export default function BrandList() {
               >
                 <span>
                   <span className="d-block fw-semibold">{item.brand}</span>
-                  <span className="d-block small opacity-75">
-                    {item.number}
+                  <span className="d-block small text-body-secondary">
+                    <span className="part-number">{item.number}</span>
                     {item.name && ` · ${item.name}`}
                   </span>
                 </span>
-                <StockBadge count={item.count} />
+                <StockPill count={item.count} />
               </button>
             )
           })}
@@ -89,9 +79,9 @@ export default function BrandList() {
   }
 
   return (
-    <section className="card shadow-sm">
+    <section className="card">
       <div className="card-header bg-body d-flex justify-content-between align-items-center">
-        <h2 className="h6 mb-0">{t('brands.title')}</h2>
+        <h2 className="section-title mb-0">{t('brands.title')}</h2>
         {brands.status === 'succeeded' && (
           <span className="small text-body-secondary">{brands.items.length}</span>
         )}

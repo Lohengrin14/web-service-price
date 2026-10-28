@@ -59,7 +59,7 @@ export default function SearchForm() {
   }
 
   return (
-    <form className="mb-4" role="search" onSubmit={handleSubmit}>
+    <form className="search-hero mb-4" role="search" onSubmit={handleSubmit}>
       <label htmlFor="part-number" className="form-label fw-semibold">
         {t('search.label')}
       </label>

@@ -91,6 +91,16 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
   When live responses become available, compare them with `src/api/favorit.js`, fix the parser,
   and add sanitized real responses (no key) as test fixtures.
 
+## Design system
+
+- Bootstrap 5.3 stays; `src/index.css` defines `--ps-*` tokens (slate neutrals, one amber accent,
+  green/red only by meaning) and maps Bootstrap CSS variables onto them. Light and dark themes via
+  `data-bs-theme`; the theme is set before render by a script in `index.html`.
+- Text contrast must stay ≥ WCAG AA in both themes: amber `#f59e0b`/`#d97706` are fills, borders
+  and focus only; text uses `--ps-accent-text`. Use tokens, not hard-coded colors.
+- Helpers: `.part-number` (monospace), `.num` (tabular digits), `StockPill`, `Skeleton`,
+  `.btn-quiet` for secondary buttons; `.btn-primary` is the only bright fill.
+
 ## Workflow
 
 - Read the relevant files before editing; don't guess file contents.
