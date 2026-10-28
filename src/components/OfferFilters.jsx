@@ -13,6 +13,8 @@ import {
   setInStockOnly,
   setMaxPrice,
   setMinPrice,
+  setOwnOnly,
+  setReturnableOnly,
   setSort,
   toggleBrand,
   toggleCity,
@@ -30,6 +32,24 @@ const SORT_OPTIONS = [
   'shipment-asc',
   'shipment-desc',
 ]
+
+function FilterSwitch({ id, label, checked, onChange }) {
+  return (
+    <div className="form-check form-switch mb-0">
+      <input
+        id={id}
+        type="checkbox"
+        role="switch"
+        className="form-check-input"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      <label htmlFor={id} className="form-check-label small">
+        {label}
+      </label>
+    </div>
+  )
+}
 
 export default function OfferFilters() {
   const dispatch = useDispatch()
@@ -100,18 +120,25 @@ export default function OfferFilters() {
       )}
 
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
-        <div className="form-check form-switch mb-0">
-          <input
+        <div className="d-flex flex-wrap column-gap-4 row-gap-1">
+          <FilterSwitch
             id="in-stock-only"
-            type="checkbox"
-            role="switch"
-            className="form-check-input"
+            label={t('common.inStockOnly')}
             checked={filters.inStockOnly}
-            onChange={(event) => dispatch(setInStockOnly(event.target.checked))}
+            onChange={(value) => dispatch(setInStockOnly(value))}
           />
-          <label htmlFor="in-stock-only" className="form-check-label small">
-            {t('common.inStockOnly')}
-          </label>
+          <FilterSwitch
+            id="own-only"
+            label={t('filters.ownOnly')}
+            checked={filters.ownOnly}
+            onChange={(value) => dispatch(setOwnOnly(value))}
+          />
+          <FilterSwitch
+            id="returnable-only"
+            label={t('filters.returnableOnly')}
+            checked={filters.returnableOnly}
+            onChange={(value) => dispatch(setReturnableOnly(value))}
+          />
         </div>
         <div className="small text-body-secondary">
           {t('filters.matching', { shown, count: total })}

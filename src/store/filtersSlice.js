@@ -7,6 +7,8 @@ const initialState = {
   minPrice: '', // строки как в полях ввода; пустая строка — без ограничения
   maxPrice: '',
   inStockOnly: false,
+  ownOnly: false, // только собственные склады Фаворита
+  returnableOnly: false, // скрыть невозвратные предложения
   brands: [], // отмеченные производители; никто не отмечен — показываем всех
   cities: [], // отмеченные города складов; так же: пусто — все
   sort: 'default', // ключ из SORTERS или 'default'
@@ -27,6 +29,12 @@ const filtersSlice = createSlice({
     },
     setInStockOnly: (state, action) => {
       state.inStockOnly = action.payload
+    },
+    setOwnOnly: (state, action) => {
+      state.ownOnly = action.payload
+    },
+    setReturnableOnly: (state, action) => {
+      state.returnableOnly = action.payload
     },
     toggleBrand: (state, action) => {
       state.brands = toggle(state.brands, action.payload)
@@ -78,7 +86,10 @@ const SORTERS = {
 
 // Фильтрует и сортирует предложения. Исходный массив не меняется.
 // Сортировка устойчивая: при равных значениях сохраняется порядок по умолчанию.
-export function applyFilters(items, { minPrice, maxPrice, inStockOnly, brands, cities, sort }) {
+export function applyFilters(
+  items,
+  { minPrice, maxPrice, inStockOnly, ownOnly, returnableOnly, brands, cities, sort },
+) {
   const min = parseLimit(minPrice)
   const max = parseLimit(maxPrice)
   const checkedBrands = new Set(brands)
@@ -86,6 +97,8 @@ export function applyFilters(items, { minPrice, maxPrice, inStockOnly, brands, c
 
   const result = items.filter((offer) => {
     if (inStockOnly && offer.stock <= 0) return false
+    if (ownOnly && !offer.own) return false
+    if (returnableOnly && offer.notRefund) return false
     if (checkedBrands.size > 0 && !checkedBrands.has(offer.brand)) return false
     if (checkedCities.size > 0 && !checkedCities.has(offer.city)) return false
     // Если задан диапазон цен, позиции без цены в него не попадают
@@ -171,6 +184,8 @@ export const {
   setMinPrice,
   setMaxPrice,
   setInStockOnly,
+  setOwnOnly,
+  setReturnableOnly,
   toggleBrand,
   setBrands,
   toggleCity,

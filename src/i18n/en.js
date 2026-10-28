@@ -78,6 +78,8 @@ export default {
   'filters.findBrand': 'Find a manufacturer',
   'filters.cities': 'Cities',
   'filters.findCity': 'Find a city',
+  'filters.ownOnly': 'Own stock only',
+  'filters.returnableOnly': 'Returnable only',
   'filters.matching': { one: 'Matching: {shown} of {count} offer', other: 'Matching: {shown} of {count} offers' },
 
   'sort.default': 'Default',
