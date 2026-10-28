@@ -18,7 +18,8 @@ the guiding principle is **the simpler, the better**.
 - Talk to the user in **Russian**.
 - UI texts live in dictionaries `src/i18n/ru.js` and `src/i18n/en.js` (same keys, checked by a test);
   components use `useT()`. Russian is the default language by design. Code comments are in **Russian**.
-- The English UI searches by part number only (the name catalog is Russian); its texts don't mention name search.
+- Catalog search matches words in part names and manufacturers. The English UI advertises part number and
+  manufacturer search only (manufacturers are Latin, part names are Russian).
 - API errors are stored as codes (`{ codes, params }` via `rejectWithValue`) and translated on render.
 - Never pass `shipmentDate` through `new Date()` for display: it is Moscow time "order by".
 - **Git commit messages, branch names and PR titles/descriptions are in English**, Conventional Commits

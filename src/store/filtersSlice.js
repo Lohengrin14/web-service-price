@@ -112,6 +112,36 @@ export function summarizeStock(items, field, stockField = 'stock') {
     .sort((a, b) => b.stock - a.stock || a.value.localeCompare(b.value, 'ru'))
 }
 
+// «Круглые» единицы от крупных к мелким: …, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1
+function niceUnits(span) {
+  const units = []
+  for (let power = 10 ** Math.ceil(Math.log10(span)); power >= 1; power /= 10) {
+    units.push(power, power / 2, power / 5)
+  }
+  return units.filter((unit) => unit >= 1)
+}
+
+// Шкала ползунка цены: края округлены наружу до самой крупной круглой единицы, при которой
+// шкала длиннее реального разброса цен не больше чем на 10 % (139…2137 → 100…2200,
+// 598…1067 → 580…1080). Шаг — круглый, около сотой доли шкалы. null — если двигать нечего.
+export function priceScale(prices) {
+  if (prices.length < 2) return null
+  const low = Math.min(...prices)
+  const high = Math.max(...prices)
+  const span = high - low
+  if (span === 0) return null
+
+  const fits = (unit) => Math.ceil(high / unit) * unit - Math.floor(low / unit) * unit <= span * 1.1
+  const unit = niceUnits(span).find(fits) ?? 1
+  const min = Math.floor(low / unit) * unit
+  const max = Math.ceil(high / unit) * unit
+  const raw = (max - min) / 100
+  const power = 10 ** Math.floor(Math.log10(raw))
+  const step = Math.max(1, [1, 2, 5, 10].map((k) => k * power).find((value) => value >= raw))
+
+  return { min, max, step }
+}
+
 const selectOfferItems = (state) => state.search.offers.items
 export const selectFilters = (state) => state.filters
 
@@ -119,6 +149,11 @@ export const selectVisibleOffers = createSelector([selectOfferItems, selectFilte
 
 export const selectOfferBrands = createSelector([selectOfferItems], (items) =>
   summarizeStock(items, 'brand'),
+)
+
+// Шкала считается по всей выдаче, а не по отфильтрованной — иначе края прыгали бы при фильтрации
+export const selectPriceScale = createSelector([selectOfferItems], (items) =>
+  priceScale(items.map((offer) => offer.price).filter((price) => price !== null)),
 )
 
 export const selectOfferCities = createSelector([selectOfferItems], (items) =>

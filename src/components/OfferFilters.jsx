@@ -6,6 +6,7 @@ import {
   selectHasActiveFilters,
   selectOfferBrands,
   selectOfferCities,
+  selectPriceScale,
   selectVisibleOffers,
   setBrands,
   setCities,
@@ -17,6 +18,7 @@ import {
   toggleCity,
 } from '../store/filtersSlice'
 import CheckboxFilter from './CheckboxFilter'
+import PriceRange from './PriceRange'
 
 // Подписи — в словаре под ключами sort.<значение>
 const SORT_OPTIONS = [
@@ -35,40 +37,26 @@ export default function OfferFilters() {
   const filters = useSelector(selectFilters)
   const brands = useSelector(selectOfferBrands)
   const cities = useSelector(selectOfferCities)
+  const priceScale = useSelector(selectPriceScale)
   const shown = useSelector(selectVisibleOffers).length
   const total = useSelector((state) => state.search.offers.items.length)
   const hasActiveFilters = useSelector(selectHasActiveFilters)
 
   return (
     <div className="card-body border-bottom">
-      <div className="row g-2">
-        <div className="col-sm-6">
-          <label htmlFor="price-min" className="form-label small mb-1">
-            {t('filters.price')}
-          </label>
-          <div className="input-group input-group-sm">
-            <input
-              id="price-min"
-              type="number"
-              min="0"
-              inputMode="decimal"
-              className="form-control"
-              placeholder={t('filters.priceFrom')}
-              value={filters.minPrice}
-              onChange={(event) => dispatch(setMinPrice(event.target.value))}
-            />
-            <input
-              type="number"
-              min="0"
-              inputMode="decimal"
-              className="form-control"
-              placeholder={t('filters.priceTo')}
-              aria-label={t('filters.priceToLabel')}
-              value={filters.maxPrice}
-              onChange={(event) => dispatch(setMaxPrice(event.target.value))}
+      <div className="row gx-5 gy-3">
+        {/* Ползунок нужен, только если в выдаче есть хотя бы две разные цены */}
+        {priceScale && (
+          <div className="col-sm-6">
+            <PriceRange
+              scale={priceScale}
+              minPrice={filters.minPrice}
+              maxPrice={filters.maxPrice}
+              onMinChange={(value) => dispatch(setMinPrice(value))}
+              onMaxChange={(value) => dispatch(setMaxPrice(value))}
             />
           </div>
-        </div>
+        )}
         <div className="col-sm-6">
           <label htmlFor="offer-sort" className="form-label small mb-1">
             {t('filters.sort')}

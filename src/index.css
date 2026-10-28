@@ -236,8 +236,19 @@ small {
   font-size: 1.125rem;
 }
 
-.search-hero .form-text {
-  color: var(--ps-muted);
+/* Поле и кнопка «Найти» подсвечиваются в фокусе одним кольцом, а не только поле */
+.search-hero .input-group {
+  border-radius: var(--bs-border-radius-lg);
+  transition: box-shadow 0.12s ease;
+}
+
+.search-hero .input-group:focus-within {
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+
+.search-hero .input-group .form-control:focus,
+.search-hero .input-group .btn:focus-visible {
+  box-shadow: none;
 }
 
 @media (max-width: 575.98px) {
@@ -263,6 +274,96 @@ small {
 /* Кнопка «Наверх» возвращает к началу карточки предложений с небольшим отступом сверху */
 .offers-card {
   scroll-margin-top: 1rem;
+}
+
+/* ---------- Ползунок цены: два бегунка на одной шкале ---------- */
+.price-range {
+  position: relative;
+  height: 1.75rem;
+}
+
+/* Шкала и заполненный отрезок между бегунками (--range-from/--range-to ставит компонент) */
+.price-range-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--ps-border) var(--range-from),
+    var(--ps-accent-fill) var(--range-from) var(--range-to),
+    var(--ps-border) var(--range-to)
+  );
+}
+
+/* Сами input прозрачные и не ловят клики — клики ловят только бегунки */
+.price-range input[type='range'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  appearance: none;
+  -webkit-appearance: none;
+  z-index: 2;
+}
+
+.price-range input[type='range']:focus-visible {
+  outline: none;
+}
+
+.price-range input[type='range']::-webkit-slider-runnable-track {
+  background: transparent;
+}
+
+.price-range input[type='range']::-moz-range-track {
+  background: transparent;
+}
+
+.price-range input[type='range']::-webkit-slider-thumb {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--ps-accent-fill);
+  border-radius: 50%;
+  background: var(--ps-surface);
+  box-shadow: var(--ps-shadow);
+  cursor: grab;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.price-range input[type='range']::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--ps-accent-fill);
+  border-radius: 50%;
+  background: var(--ps-surface);
+  box-shadow: var(--ps-shadow);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.price-range input[type='range']:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+
+.price-range input[type='range']:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+
+.price-range input[type='range']:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  background: var(--ps-accent-fill);
+}
+
+.price-range input[type='range']:active::-moz-range-thumb {
+  cursor: grabbing;
+  background: var(--ps-accent-fill);
 }
 
 /* ---------- Наличие: пилюля с точкой ---------- */
