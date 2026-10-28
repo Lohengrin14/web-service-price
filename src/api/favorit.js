@@ -7,19 +7,29 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api/search'
 const TIMEOUT_MS = 15_000
 
-// Ошибки из документации → понятные сообщения
+// Ошибки из документации → коды. Текст для пользователя берётся из словаря (src/i18n, errors.*),
+// поэтому он показывается на выбранном языке.
 const KNOWN_ERRORS = {
-  'Empty key!': 'Не указан ключ API (FAVORIT_API_KEY).',
-  'Invalid key client!': 'Неверный ключ API: покупатель не найден. Проверьте FAVORIT_API_KEY.',
-  'Empty number goods!': 'Не указан номер детали.',
+  'Empty key!': 'emptyKey',
+  'Invalid key client!': 'invalidKey',
+  'Empty number goods!': 'emptyNumber',
   // По документации квота действует на поиск грузовых запчастей
-  'Request quota exceeded!': 'Превышен лимит запросов по грузовому ассортименту. Попробуйте позже.',
+  'Request quota exceeded!': 'quota',
 }
 
+// codes — ключи ошибок (errors.<код> в словаре), params — подстановки в текст
 export class ApiError extends Error {
   name = 'ApiError'
+
+  constructor(codes, params = {}, options) {
+    const list = Array.isArray(codes) ? codes : [codes]
+    super(list.join(', '), options)
+    this.codes = list
+    this.params = params
+  }
 }
 
+// Ответ с полем error → { codes, params }. В одном ответе может быть несколько ошибок.
 export function describeApiError(error) {
   const parts = Array.isArray(error) ? error : [error]
   const text = parts
@@ -29,9 +39,9 @@ export function describeApiError(error) {
 
   const known = Object.entries(KNOWN_ERRORS)
     .filter(([original]) => text.includes(original))
-    .map(([, message]) => message)
+    .map(([, code]) => code)
 
-  return known.length > 0 ? known.join(' ') : `Сервис вернул ошибку: ${text}`
+  return known.length > 0 ? { codes: known, params: {} } : { codes: ['apiError'], params: { text } }
 }
 
 // «Не найдено» API возвращает как массив с одной пустой структурой — такие элементы отбрасываем
@@ -61,10 +71,13 @@ function parseJson(text) {
 
 // Разбирает тело ответа: ошибку API превращает в ApiError, «не найдено» — в пустой массив
 export function parseGoods(data) {
-  if (data?.error) throw new ApiError(describeApiError(data.error))
+  if (data?.error) {
+    const { codes, params } = describeApiError(data.error)
+    throw new ApiError(codes, params)
+  }
 
   const goods = Array.isArray(data) ? data : data?.goods
-  if (!Array.isArray(goods)) throw new ApiError('Сервис вернул ответ неожиданного формата.')
+  if (!Array.isArray(goods)) throw new ApiError('badFormat')
 
   return goods.filter(isRealItem)
 }
@@ -85,11 +98,9 @@ export async function requestGoods(params) {
     text = await response.text()
   } catch (error) {
     if (controller.signal.aborted) {
-      throw new ApiError(`Сервис не ответил за ${TIMEOUT_MS / 1000} секунд. Попробуйте ещё раз.`)
+      throw new ApiError('timeout', { seconds: TIMEOUT_MS / 1000 })
     }
-    throw new ApiError('Не удалось связаться с сервисом. Проверьте подключение к интернету.', {
-      cause: error,
-    })
+    throw new ApiError('network', {}, { cause: error })
   } finally {
     clearTimeout(timer)
   }
@@ -97,13 +108,9 @@ export async function requestGoods(params) {
   const data = parseJson(text)
 
   if (!response.ok && !data?.error) {
-    throw new ApiError(
-      response.status >= 500
-        ? `Сервис недоступен (HTTP ${response.status}). Попробуйте позже.`
-        : `Ошибка запроса (HTTP ${response.status}).`,
-    )
+    throw new ApiError(response.status >= 500 ? 'unavailable' : 'http', { status: response.status })
   }
-  if (data === undefined) throw new ApiError('Сервис вернул ответ не в формате JSON.')
+  if (data === undefined) throw new ApiError('notJson')
 
   return parseGoods(data)
 }

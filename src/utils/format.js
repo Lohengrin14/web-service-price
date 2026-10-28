@@ -1,7 +1,13 @@
-const priceFormat = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' })
+import { localeOf, translate } from '../i18n'
 
-export function formatPrice(price) {
-  return price === null ? '—' : priceFormat.format(price)
+// Цена всегда в рублях; narrowSymbol — чтобы и в английской версии был «₽», а не «RUB»
+export function formatPrice(price, lang = 'ru') {
+  if (price === null) return '—'
+  return new Intl.NumberFormat(localeOf(lang), {
+    style: 'currency',
+    currency: 'RUB',
+    currencyDisplay: 'narrowSymbol',
+  }).format(price)
 }
 
 // shipmentDate — дата отгрузки и время, до которого нужно сделать заказ.
@@ -22,18 +28,30 @@ function parseShipment(value) {
   return null
 }
 
-// Год не показываем: отгрузка всегда в ближайшие дни
-export function formatShipment(value) {
+// Как показывать дату отгрузки: «29.10» или «Oct 29». Год не нужен — отгрузка в ближайшие дни.
+const DATE_OPTIONS = {
+  ru: { day: '2-digit', month: '2-digit' },
+  en: { month: 'short', day: 'numeric' },
+}
+
+// Время в shipmentDate — московское «заказать до», его показываем как есть.
+// Через new Date(value) браузер сдвинул бы его на свой часовой пояс, поэтому дату
+// собираем из чисел в UTC и форматируем тоже в UTC — сдвига нет.
+export function formatShipment(value, lang = 'ru') {
   if (!value) return ''
 
   const parts = parseShipment(value)
   if (!parts) return value
 
-  const { day, month, hours, minutes } = parts
-  const date = `${day}.${month}`
+  const { year, month, day, hours, minutes } = parts
+  const date = new Intl.DateTimeFormat(localeOf(lang), {
+    ...(DATE_OPTIONS[lang] ?? DATE_OPTIONS.ru),
+    timeZone: 'UTC',
+  }).format(Date.UTC(year, month - 1, day))
   const hasTime = hours !== undefined && !(Number(hours) === 0 && Number(minutes) === 0)
 
-  return hasTime ? `${date}, заказ до ${hours.padStart(2, '0')}:${minutes}` : date
+  if (!hasTime) return date
+  return translate(lang, 'shipment.orderBy', { date, time: `${hours.padStart(2, '0')}:${minutes}` })
 }
 
 // Дата отгрузки числом — для сортировки; null, если дату не разобрать
@@ -43,15 +61,6 @@ export function shipmentTime(value) {
 
   const { year, month, day, hours = 0, minutes = 0 } = parts
   return Date.UTC(year, month - 1, day, hours, minutes)
-}
-
-// pluralize(5, ['деталь', 'детали', 'деталей']) → 'деталей'
-export function pluralize(count, [one, few, many]) {
-  const mod10 = count % 10
-  const mod100 = count % 100
-  if (mod10 === 1 && mod100 !== 11) return one
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
-  return many
 }
 
 // Артикулы вводят как попало: «ОС 90 », «oc90». Приводим к одному виду,

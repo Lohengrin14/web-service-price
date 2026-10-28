@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useT } from '../i18n'
 import { resetFilters, selectFilters, selectVisibleOffers, setSort } from '../store/filtersSlice'
 import { fetchOffers, selectSearch } from '../store/searchSlice'
-import { formatPrice, formatShipment, pluralize } from '../utils/format'
+import { formatPrice, formatShipment } from '../utils/format'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
 import Loader from './Loader'
@@ -52,8 +53,9 @@ function SortHeader({ label, orders, className }) {
 }
 
 function OfferRow({ offer }) {
+  const { t, lang } = useT()
   const inStock = offer.stock > 0
-  const shipment = formatShipment(offer.shipmentDate)
+  const shipment = formatShipment(offer.shipmentDate, lang)
   const warehouse = [offer.warehouse, shipment].filter(Boolean).join(' · ')
 
   return (
@@ -73,18 +75,19 @@ function OfferRow({ offer }) {
       </td>
       <td className="text-end text-nowrap">
         {inStock ? (
-          `${offer.stock} шт.`
+          t('common.pcs', { count: offer.stock })
         ) : (
-          <span className="badge text-bg-light border">нет в наличии</span>
+          <span className="badge text-bg-light border">{t('common.outOfStock')}</span>
         )}
       </td>
-      <td className="text-end text-nowrap fw-semibold">{formatPrice(offer.price)}</td>
+      <td className="text-end text-nowrap fw-semibold">{formatPrice(offer.price, lang)}</td>
     </tr>
   )
 }
 
 // offers — вся группа (для счётчиков), rows — строки, которые видны на текущей странице
 function OfferGroup({ title, offers, rows = offers, emptyText }) {
+  const { t } = useT()
   const parts = new Set(offers.map((offer) => offer.partKey)).size
 
   return (
@@ -94,8 +97,7 @@ function OfferGroup({ title, offers, rows = offers, emptyText }) {
           {title}
           {offers.length > 0 && (
             <span className="fw-normal text-body-secondary">
-              {` · ${parts} ${pluralize(parts, ['деталь', 'детали', 'деталей'])}, `}
-              {`${offers.length} ${pluralize(offers.length, ['предложение', 'предложения', 'предложений'])}`}
+              {` · ${t('offers.parts', { count: parts })}, ${t('offers.count', { count: offers.length })}`}
             </span>
           )}
         </th>
@@ -115,6 +117,7 @@ function OfferGroup({ title, offers, rows = offers, emptyText }) {
 
 export default function OffersTable() {
   const dispatch = useDispatch()
+  const { t } = useT()
   const { selected, offers } = useSelector(selectSearch)
   const visible = useSelector(selectVisibleOffers)
   const [limit, setLimit] = useState(PAGE_SIZE)
@@ -141,36 +144,34 @@ export default function OffersTable() {
   let body
   if (!selected) {
     body = (
-      <div className="card-body text-body-secondary">
-        Здесь появятся цены, остатки и аналоги выбранного производителя.
-      </div>
+      <div className="card-body text-body-secondary">{t('offers.placeholder')}</div>
     )
   } else if (offers.status === 'loading') {
     body = (
       <div className="card-body">
-        <Loader text="Загружаем предложения и аналоги…" />
+        <Loader text={t('offers.loading')} />
       </div>
     )
   } else if (offers.status === 'failed') {
     body = (
       <div className="card-body">
-        <ErrorAlert message={offers.error} onRetry={() => dispatch(fetchOffers(selected))} />
+        <ErrorAlert error={offers.error} onRetry={() => dispatch(fetchOffers(selected))} />
       </div>
     )
   } else if (offers.items.length === 0) {
-    body = <div className="card-body text-body-secondary">Предложений по этой детали не найдено.</div>
+    body = <div className="card-body text-body-secondary">{t('offers.empty')}</div>
   } else if (visible.length === 0) {
     body = (
       <>
         <OfferFilters />
         <div className="card-body text-body-secondary">
-          Под выбранные фильтры ничего не подошло.{' '}
+          {t('common.noFilterMatch')}{' '}
           <button
             type="button"
             className="btn btn-link p-0 align-baseline"
             onClick={() => dispatch(resetFilters())}
           >
-            Сбросить фильтры
+            {t('common.resetFilters')}
           </button>
         </div>
       </>
@@ -192,25 +193,29 @@ export default function OffersTable() {
           <table className="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th scope="col">Деталь</th>
+                <th scope="col">{t('offers.colPart')}</th>
                 <SortHeader
-                  label="Склад, отгрузка"
+                  label={t('offers.colWarehouse')}
                   orders={SHIPMENT_ORDERS}
                   className="d-none d-md-table-cell"
                 />
-                <SortHeader label="Остаток" orders={STOCK_ORDERS} className="text-end" />
-                <SortHeader label="Цена" orders={PRICE_ORDERS} className="text-end" />
+                <SortHeader label={t('offers.colStock')} orders={STOCK_ORDERS} className="text-end" />
+                <SortHeader label={t('offers.colPrice')} orders={PRICE_ORDERS} className="text-end" />
               </tr>
             </thead>
             {/* Искомую деталь фильтры тоже скрывают, но секция остаётся, чтобы это было видно */}
             {hasOriginal && (
-              <OfferGroup title="Искомая деталь" offers={original} emptyText="Скрыта фильтрами." />
+              <OfferGroup
+                title={t('offers.original')}
+                offers={original}
+                emptyText={t('offers.hiddenByFilters')}
+              />
             )}
             <OfferGroup
-              title="Аналоги"
+              title={t('offers.analogues')}
               offers={analogues}
               rows={analogueRows}
-              emptyText={hasAnalogues ? 'Под фильтры не подошёл ни один аналог.' : 'Аналогов не найдено.'}
+              emptyText={t(hasAnalogues ? 'offers.noAnalogueMatch' : 'offers.noAnalogues')}
             />
           </table>
         </div>
@@ -222,14 +227,13 @@ export default function OffersTable() {
             style={{ zIndex: 1030 }}
             onClick={() => sectionRef.current.scrollIntoView({ behavior: 'smooth' })}
           >
-            ↑ Наверх
+            {t('common.toTop')}
           </button>
         )}
         {rest > 0 && (
           <LoadMore
-            label="Показано аналогов"
+            text={t('offers.loadMore', { shown: analogueRows.length, total: analogues.length })}
             shown={analogueRows.length}
-            total={analogues.length}
             onLoad={showMore}
           />
         )}
@@ -240,7 +244,7 @@ export default function OffersTable() {
   return (
     <section ref={sectionRef} className="card shadow-sm offers-card">
       <div className="card-header bg-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <h2 className="h6 mb-0">Предложения и аналоги</h2>
+        <h2 className="h6 mb-0">{t('offers.title')}</h2>
         {selected && (
           <span className="small text-body-secondary">
             {selected.brand} · {selected.number}

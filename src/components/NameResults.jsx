@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useT } from '../i18n'
 import { summarizeStock } from '../store/filtersSlice'
 import { fetchBrands, searchByName, selectSearch } from '../store/searchSlice'
-import { pluralize } from '../utils/format'
 import CheckboxFilter from './CheckboxFilter'
 import ErrorAlert from './ErrorAlert'
 import LoadMore from './LoadMore'
@@ -36,6 +36,7 @@ const toggle = (list, value) =>
 // обычный поиск по артикулу с этим производителем — дальше этапы 1 и 2 как всегда.
 export default function NameResults() {
   const dispatch = useDispatch()
+  const { t } = useT()
   const { query, names } = useSelector(selectSearch)
   // Фильтры живут только на этом экране; при новом поиске компонент создаётся заново (key в App)
   const [checkedBrands, setCheckedBrands] = useState([])
@@ -73,20 +74,18 @@ export default function NameResults() {
   if (names.status === 'loading') {
     body = (
       <div className="card-body">
-        <Loader text="Ищем в справочнике…" />
+        <Loader text={t('names.loading')} />
       </div>
     )
   } else if (names.status === 'failed') {
     body = (
       <div className="card-body">
-        <ErrorAlert message={names.error} onRetry={() => dispatch(searchByName(query))} />
+        <ErrorAlert error={names.error} onRetry={() => dispatch(searchByName(query))} />
       </div>
     )
   } else if (names.items.length === 0) {
     body = (
-      <div className="card-body text-body-secondary">
-        В справочнике по этому названию пусто. Поиск по артикулу — полный, попробуйте номер детали.
-      </div>
+      <div className="card-body text-body-secondary">{t('names.empty')}</div>
     )
   } else {
     const rows = visible.slice(0, limit)
@@ -95,15 +94,12 @@ export default function NameResults() {
     body = (
       <>
         <div className="card-body border-bottom">
-          <p className="small text-body-secondary mb-0">
-            Список по названию может быть неполным — он строится по справочнику. Полный список
-            предложений и аналогов — в поиске по артикулу.
-          </p>
+          <p className="small text-body-secondary mb-0">{t('names.incomplete')}</p>
           {brandOptions.length > 1 && (
             <CheckboxFilter
               id="name-brands"
-              title="Производители"
-              searchPlaceholder="Найти производителя"
+              title={t('brands.title')}
+              searchPlaceholder={t('filters.findBrand')}
               options={brandOptions}
               checked={checkedBrands}
               onToggle={(value) => changeFilters(() => setCheckedBrands((checked) => toggle(checked, value)))}
@@ -121,19 +117,18 @@ export default function NameResults() {
                 onChange={(event) => changeFilters(() => setInStockOnly(event.target.checked))}
               />
               <label htmlFor="name-in-stock-only" className="form-check-label small">
-                Только в наличии
+                {t('common.inStockOnly')}
               </label>
             </div>
             <div className="small text-body-secondary">
-              Подходит {visible.length} из {names.items.length}{' '}
-              {pluralize(names.items.length, ['детали', 'деталей', 'деталей'])}
+              {t('names.matching', { shown: visible.length, count: names.items.length })}
               <button
                 type="button"
                 className="btn btn-link btn-sm p-0 ms-2 align-baseline"
                 disabled={!hasFilters}
                 onClick={resetFilters}
               >
-                Сбросить фильтры
+                {t('common.resetFilters')}
               </button>
             </div>
           </div>
@@ -141,22 +136,22 @@ export default function NameResults() {
 
         {rows.length === 0 ? (
           <div className="card-body text-body-secondary">
-            Под выбранные фильтры ничего не подошло.{' '}
+            {t('common.noFilterMatch')}{' '}
             <button type="button" className="btn btn-link p-0 align-baseline" onClick={resetFilters}>
-              Сбросить фильтры
+              {t('common.resetFilters')}
             </button>
           </div>
         ) : (
           <div className="list-group list-group-flush">
             <div className="list-group-item d-flex justify-content-between gap-3 bg-body-tertiary">
               <SortButton
-                label="Производитель"
+                label={t('names.colBrand')}
                 orders={BRAND_ORDERS}
                 sort={sort}
                 onSort={(value) => changeFilters(() => setSort(value))}
               />
               <SortButton
-                label="Количество, шт."
+                label={t('names.colCount')}
                 orders={COUNT_ORDERS}
                 sort={sort}
                 onSort={(value) => changeFilters(() => setSort(value))}
@@ -177,7 +172,7 @@ export default function NameResults() {
                 <span
                   className={`badge rounded-pill text-nowrap ${item.count > 0 ? 'text-bg-success' : 'text-bg-light border'}`}
                 >
-                  {item.count > 0 ? `${item.count} шт.` : 'нет в наличии'}
+                  {item.count > 0 ? t('common.pcs', { count: item.count }) : t('common.outOfStock')}
                 </span>
               </button>
             ))}
@@ -186,16 +181,12 @@ export default function NameResults() {
 
         {rows.length < visible.length && (
           <LoadMore
-            label="Показано деталей"
+            text={t('names.loadMore', { shown: rows.length, total: visible.length })}
             shown={rows.length}
-            total={visible.length}
             onLoad={showMore}
           />
         )}
-        <div className="card-footer bg-body small text-body-secondary">
-          Остаток — на момент, когда деталь попала в справочник. Актуальные цены и остатки — после
-          выбора детали.
-        </div>
+        <div className="card-footer bg-body small text-body-secondary">{t('names.stockNote')}</div>
       </>
     )
   }
@@ -203,7 +194,7 @@ export default function NameResults() {
   return (
     <section className="card shadow-sm">
       <div className="card-header bg-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <h2 className="h6 mb-0">Детали из справочника</h2>
+        <h2 className="h6 mb-0">{t('names.title')}</h2>
         <span className="small text-body-secondary">«{query}»</span>
       </div>
       {body}

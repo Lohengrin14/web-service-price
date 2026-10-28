@@ -5,7 +5,6 @@ import {
   formatPrice,
   formatShipment,
   normalizeNumber,
-  pluralize,
   shipmentTime,
 } from './format'
 
@@ -31,24 +30,21 @@ describe('shipmentTime', () => {
   })
 })
 
-describe('formatPrice', () => {
-  it('форматирует рубли и пустую цену', () => {
-    expect(formatPrice(1234.5).replace(/\s/g, ' ')).toBe('1 234,50 ₽')
-    expect(formatPrice(null)).toBe('—')
+describe('formatShipment по-английски', () => {
+  it('переводит слова, но не сдвигает московское время на часовой пояс браузера', () => {
+    expect(formatShipment('2026-10-31T13:30:00+03:00', 'en')).toBe('Oct 31, order by 13:30')
+    expect(formatShipment('2026-10-31T13:30:00+03:00', 'ru')).toBe('31.10, заказ до 13:30')
   })
 })
 
-describe('pluralize', () => {
-  it('склоняет по-русски', () => {
-    const forms = ['деталь', 'детали', 'деталей']
-    expect([1, 2, 5, 11, 21, 104].map((n) => pluralize(n, forms))).toEqual([
-      'деталь',
-      'детали',
-      'деталей',
-      'деталей',
-      'деталь',
-      'детали',
-    ])
+describe('formatPrice', () => {
+  it('в английской версии показывает ₽, а не RUB', () => {
+    expect(formatPrice(1234.5, 'en')).toBe('₽1,234.50')
+  })
+
+  it('форматирует рубли и пустую цену', () => {
+    expect(formatPrice(1234.5).replace(/\s/g, ' ')).toBe('1 234,50 ₽')
+    expect(formatPrice(null)).toBe('—')
   })
 })
 

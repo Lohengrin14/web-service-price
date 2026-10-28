@@ -87,6 +87,18 @@ describe('fetchBrands', () => {
     expect(store.getState().search.selected).toEqual({ brand: 'MAHLE', number: 'OC90' })
   })
 
+  it('кладёт ошибку API в стор кодом, а не готовым текстом', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ error: 'Request quota exceeded!' })))
+    const store = configureStore({ reducer: { search: searchReducer } })
+
+    await store.dispatch(fetchBrands({ number: 'X1' }))
+
+    expect(store.getState().search.brands).toMatchObject({
+      status: 'failed',
+      error: { codes: ['quota'], params: {} },
+    })
+  })
+
   it('ничего не выбирает, если производителей нет', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ goods: [{ brand: '', number: '' }] })))
     const store = configureStore({ reducer: { search: searchReducer } })

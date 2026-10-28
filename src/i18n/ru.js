@@ -1,0 +1,115 @@
+// Русский — язык по умолчанию. Набор ключей в en.js должен совпадать (это проверяет тест).
+// Значение — строка с подстановками {name} или формы для Intl.PluralRules по {count}.
+export default {
+  'app.title': 'Поиск автозапчастей',
+  'app.subtitle': 'Введите артикул или название, выберите производителя — покажем цены, остатки и аналоги.',
+  'app.language': 'Язык интерфейса',
+
+  'search.label': 'Артикул или название детали',
+  'search.placeholder': 'Например, 01089 или колодки',
+  'search.submit': 'Найти',
+  'search.loading': 'Идёт поиск',
+  'search.hint':
+    'Поиск запускается сам через секунду после ввода, по Enter — сразу. Поиск по артикулу — полный. ' +
+    'По названию — по справочнику, результат может быть неполным.',
+
+  'common.loading': 'Загрузка…',
+  'common.retry': 'Повторить',
+  'common.nothingFound': 'Ничего не найдено.',
+  'common.pcs': '{count} шт.',
+  'common.outOfStock': 'нет в наличии',
+  'common.inStockOnly': 'Только в наличии',
+  'common.resetFilters': 'Сбросить фильтры',
+  'common.noFilterMatch': 'Под выбранные фильтры ничего не подошло.',
+  'common.sortHint': 'Нажмите, чтобы отсортировать',
+  'common.toTop': '↑ Наверх',
+
+  'checkbox.some': '{checked} из {total}',
+  'checkbox.all': 'все ({total})',
+  'checkbox.selectAll': 'Выбрать всех',
+
+  'brands.title': 'Производители',
+  'brands.loading': 'Ищем производителей…',
+  'brands.notFound': 'По артикулу {number} ничего не найдено. Проверьте номер.',
+  'brands.search': 'Поиск',
+  'brands.searchLabel': 'Поиск производителя',
+
+  'offers.title': 'Предложения и аналоги',
+  'offers.placeholder': 'Здесь появятся цены, остатки и аналоги выбранного производителя.',
+  'offers.loading': 'Загружаем предложения и аналоги…',
+  'offers.empty': 'Предложений по этой детали не найдено.',
+  'offers.colPart': 'Деталь',
+  'offers.colWarehouse': 'Склад, отгрузка',
+  'offers.colStock': 'Остаток',
+  'offers.colPrice': 'Цена',
+  'offers.original': 'Искомая деталь',
+  'offers.analogues': 'Аналоги',
+  'offers.hiddenByFilters': 'Скрыта фильтрами.',
+  'offers.noAnalogueMatch': 'Под фильтры не подошёл ни один аналог.',
+  'offers.noAnalogues': 'Аналогов не найдено.',
+  'offers.parts': { one: '{count} деталь', few: '{count} детали', many: '{count} деталей', other: '{count} детали' },
+  'offers.count': {
+    one: '{count} предложение',
+    few: '{count} предложения',
+    many: '{count} предложений',
+    other: '{count} предложения',
+  },
+  'offers.loadMore': 'Показано аналогов: {shown} из {total}. Прокрутите ниже, чтобы увидеть ещё.',
+
+  'filters.price': 'Цена, ₽',
+  'filters.priceFrom': 'от',
+  'filters.priceTo': 'до',
+  'filters.priceToLabel': 'Цена до',
+  'filters.sort': 'Сортировка',
+  'filters.findBrand': 'Найти производителя',
+  'filters.cities': 'Города',
+  'filters.findCity': 'Найти город',
+  'filters.noWarehouse': 'Нет в наличии',
+  'filters.matching': {
+    one: 'Подходит {shown} из {count} предложения',
+    few: 'Подходит {shown} из {count} предложений',
+    many: 'Подходит {shown} из {count} предложений',
+    other: 'Подходит {shown} из {count} предложения',
+  },
+
+  'sort.default': 'По умолчанию',
+  'sort.price-asc': 'Сначала дешёвые',
+  'sort.price-desc': 'Сначала дорогие',
+  'sort.stock-desc': 'Больше остаток',
+  'sort.stock-asc': 'Меньше остаток',
+  'sort.shipment-asc': 'Раньше отгрузка',
+  'sort.shipment-desc': 'Позже отгрузка',
+
+  'names.title': 'Детали из справочника',
+  'names.loading': 'Ищем в справочнике…',
+  'names.empty': 'В справочнике по этому названию пусто. Поиск по артикулу — полный, попробуйте номер детали.',
+  'names.incomplete':
+    'Список по названию может быть неполным — он строится по справочнику. ' +
+    'Полный список предложений и аналогов — в поиске по артикулу.',
+  'names.colBrand': 'Производитель',
+  'names.colCount': 'Количество, шт.',
+  'names.matching': {
+    one: 'Подходит {shown} из {count} детали',
+    few: 'Подходит {shown} из {count} деталей',
+    many: 'Подходит {shown} из {count} деталей',
+    other: 'Подходит {shown} из {count} детали',
+  },
+  'names.loadMore': 'Показано деталей: {shown} из {total}. Прокрутите ниже, чтобы увидеть ещё.',
+  'names.stockNote':
+    'Остаток — на момент, когда деталь попала в справочник. Актуальные цены и остатки — после выбора детали.',
+
+  'shipment.orderBy': '{date}, заказ до {time}',
+
+  'errors.unknown': 'Что-то пошло не так.',
+  'errors.emptyKey': 'Не указан ключ API (FAVORIT_API_KEY).',
+  'errors.invalidKey': 'Неверный ключ API: покупатель не найден. Проверьте FAVORIT_API_KEY.',
+  'errors.emptyNumber': 'Не указан номер детали.',
+  'errors.quota': 'Превышен лимит запросов по грузовому ассортименту. Попробуйте позже.',
+  'errors.apiError': 'Сервис вернул ошибку: {text}',
+  'errors.badFormat': 'Сервис вернул ответ неожиданного формата.',
+  'errors.notJson': 'Сервис вернул ответ не в формате JSON.',
+  'errors.timeout': 'Сервис не ответил за {seconds} секунд. Попробуйте ещё раз.',
+  'errors.network': 'Не удалось связаться с сервисом. Проверьте подключение к интернету.',
+  'errors.unavailable': 'Сервис недоступен (HTTP {status}). Попробуйте позже.',
+  'errors.http': 'Ошибка запроса (HTTP {status}).',
+}

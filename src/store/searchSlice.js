@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { extractBrands, extractOffers, requestGoods } from '../api/favorit'
+import { ApiError, extractBrands, extractOffers, requestGoods } from '../api/favorit'
 import { searchCatalog } from '../catalog'
 import { canonicalNumber, normalizeNumber } from '../utils/format'
 
@@ -25,13 +25,27 @@ async function cached(key, load) {
 
 export const clearResponseCache = () => cache.clear()
 
+// Ошибки API кладём в стор кодами ({ codes, params }), а не готовым текстом:
+// текст на выбранном языке подставит интерфейс, и он сменится вместе с языком
+function rejectApiError(error, rejectWithValue) {
+  if (error instanceof ApiError) return rejectWithValue({ codes: error.codes, params: error.params })
+  throw error
+}
+
+const errorOf = (action) => action.payload ?? { codes: ['unknown'], params: {} }
+
 // Этап 2: предложения и аналоги по номеру и бренду
 export const fetchOffers = createAsyncThunk(
   'search/fetchOffers',
-  async ({ number, brand }) =>
-    cached(`offers|${canonicalNumber(number)}|${brand.toUpperCase()}`, async () =>
-      extractOffers(await requestGoods({ number, brand, analogues: 'on' })),
-    ),
+  async ({ number, brand }, { rejectWithValue }) => {
+    try {
+      return await cached(`offers|${canonicalNumber(number)}|${brand.toUpperCase()}`, async () =>
+        extractOffers(await requestGoods({ number, brand, analogues: 'on' })),
+      )
+    } catch (error) {
+      return rejectApiError(error, rejectWithValue)
+    }
+  },
   {
     condition: ({ number, brand }, { getState }) => {
       const { selected, offers } = getState().search
@@ -45,10 +59,15 @@ export const fetchOffers = createAsyncThunk(
 // brand — необязательный производитель, которого открыть сразу (например, из ссылки).
 export const fetchBrands = createAsyncThunk(
   'search/fetchBrands',
-  async ({ number, brand }, { dispatch, getState, requestId }) => {
-    const brands = await cached(`brands|${canonicalNumber(number)}`, async () =>
-      extractBrands(await requestGoods({ number })),
-    )
+  async ({ number, brand }, { dispatch, getState, requestId, rejectWithValue }) => {
+    let brands
+    try {
+      brands = await cached(`brands|${canonicalNumber(number)}`, async () =>
+        extractBrands(await requestGoods({ number })),
+      )
+    } catch (error) {
+      return rejectApiError(error, rejectWithValue)
+    }
 
     // Сразу открываем производителя из ссылки, а если его нет — первого (с наибольшим остатком),
     // чтобы не ждать клика. Только если за это время не начали новый поиск.
@@ -127,7 +146,7 @@ const searchSlice = createSlice({
       .addCase(searchByName.rejected, (state, action) => {
         if (!isCurrent(state.names, action)) return
         state.names.status = 'failed'
-        state.names.error = action.error.message
+        state.names.error = errorOf(action)
       })
       // Поиск по артикулу (в том числе выбор детали из справочника) закрывает поиск по названию
       .addCase(fetchBrands.pending, (state, action) => {
@@ -147,7 +166,7 @@ const searchSlice = createSlice({
       .addCase(fetchBrands.rejected, (state, action) => {
         if (!isCurrent(state.brands, action)) return
         state.brands.status = 'failed'
-        state.brands.error = action.error.message
+        state.brands.error = errorOf(action)
       })
       .addCase(fetchOffers.pending, (state, action) => {
         const { brand, number } = action.meta.arg
@@ -162,7 +181,7 @@ const searchSlice = createSlice({
       .addCase(fetchOffers.rejected, (state, action) => {
         if (!isCurrent(state.offers, action)) return
         state.offers.status = 'failed'
-        state.offers.error = action.error.message
+        state.offers.error = errorOf(action)
       })
   },
 })
