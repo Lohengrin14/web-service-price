@@ -40,6 +40,10 @@ the guiding principle is **the simpler, the better**.
   hosting function's environment (production).
 - `.env.local` must be git-ignored; `.env.example` is the committed template without a real key.
 - Do not print the real key in logs, tests, fixtures or commit messages. Strip it from any captured API response.
+- **The only exception** (agreed with the user): the GitHub Pages build has no proxy, so it embeds the
+  *public demo key* from the API docs (`PUBLIC_DEMO_KEY` in `src/config.js`), enabled by
+  `VITE_USE_DEMO_KEY=true` in the workflow. It is published in the PDF and is not a secret. A real
+  customer key must never be embedded — it needs a server-side proxy.
 
 ## Architecture
 
@@ -88,9 +92,8 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
 - `Request quota exceeded!` is a per-client limit on **truck parts** lookups (per the docs). The demo key is
   shared: never mass-query the API; keep scripts to a handful of passenger-car requests.
 - Not used yet (add only on request): `info=on` / `notRefund`, `rate`, `own`.
-- **The parser is written from the PDF only and has not been verified against the live API.**
-  When live responses become available, compare them with `src/api/favorit.js`, fix the parser,
-  and add sanitized real responses (no key) as test fixtures.
+- The parser was written from the PDF and then checked against the live API: the format matches.
+  Differences: `shipmentDate` has a timezone (`+03:00`), an undocumented `warehouseShipping` field exists.
 
 ## Design system
 
@@ -114,19 +117,17 @@ browser → /api/search?number=&brand=&analogues=  → proxy (adds key, whitelis
 - Add or update tests in `src/api/favorit.test.js` / `src/utils/format.test.js` when changing parsing or formatting.
 - Commit or push only when the user asks.
 
-## Deployment plan (agreed, not done yet)
+## Deployment
 
-The reviewer is most likely in Russia; the site must open there without a VPN.
-
-- Avoid Cloudflare (throttled in RU since mid-2025). Vercel/Netlify are partially blocked.
-- Preferred: **GitHub Pages** (static, built by GitHub Actions, `base: '/<repo-name>/'` in `vite.config.js`)
-  + **Yandex Cloud Functions** proxy (Russian IP, key in function env, CORS only for the Pages origin,
-  same param whitelist). The function URL is passed at build time via `VITE_API_URL`.
-- Fallback: Vercel (static + function in `/api`).
+- **GitHub Pages**, built by `.github/workflows/deploy.yml` on every push to `main` (lint, tests, build, publish).
+  Demo: https://lohengrin14.github.io/web-service-price/
+- No proxy on Pages: the browser calls `https://api.favorit-parts.ru/hs/hsprice/` directly (HTTPS + CORS `*`)
+  with the public demo key. Build env: `BASE_PATH=/<repo>/`, `VITE_API_URL=<API URL>`, `VITE_USE_DEMO_KEY=true`.
+- With a real key a proxy is required (Yandex Cloud Functions preferred: Russian IP; Vercel as fallback;
+  avoid Cloudflare — throttled in RU). Then `VITE_API_URL` points to the proxy and the demo key is off.
 - The user does all registrations and enters keys in dashboards; the agent provides step-by-step instructions.
 
 ## Open tasks
 
-1. Verify against the live API (e.g. number `01089`, then a brand from the response with `analogues=on`).
-2. Deploy as described above.
-3. Update `README.md` (Russian): demo link and deployment instructions.
+1. Phase 6 from the roadmap: polish and documentation (ARCHITECTURE.md decisions, keyboard navigation, extra tests).
+2. Add sanitized real API responses (no key) as test fixtures.
